@@ -9,8 +9,7 @@
 <link rel="preconnect" href="https://firebasestorage.googleapis.com" crossorigin>
 <link rel="preconnect" href="https://www.gstatic.com" crossorigin>
 <link rel="preconnect" href="https://firestore.googleapis.com" crossorigin>
-<link rel="preconnect" href="https://identitytoolkit.googleapis.com" crossorigin>
-<link rel="dns-prefetch" href="https://securetoken.googleapis.com">
+<link rel="dns-prefetch" href="https://api.ipify.org">
 <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
 <style>
   *{box-sizing:border-box;margin:0;padding:0}
@@ -613,9 +612,6 @@
   import {
     getFirestore, doc, getDoc, collection, runTransaction, onSnapshot, serverTimestamp
   } from "https://www.gstatic.com/firebasejs/10.13.2/firebase-firestore.js";
-  import {
-    getAuth, signInAnonymously, onAuthStateChanged
-  } from "https://www.gstatic.com/firebasejs/10.13.2/firebase-auth.js";
 
   const firebaseConfig = {
     apiKey: "AIzaSyAQlLh2Abk92sZVCSsYSCxvps4Uld3C1Lk",
@@ -629,7 +625,6 @@
 
   const app  = initializeApp(firebaseConfig);
   const db   = getFirestore(app);
-  const auth = getAuth(app);
 
   // Storage URL-дерін тікелей құру (SDK қоңырауысыз — лезде)
   const STORAGE_BUCKET = firebaseConfig.storageBucket;
@@ -738,7 +733,59 @@
   const photoUrls = Object.fromEntries(NURSES.map(n => [n.id, photoUrl(n.photo)]));
   let alreadyVoted = !!localStorage.getItem(VOTE_KEY);
   let votedFor = localStorage.getItem(VOTE_KEY) || null;
-  let currentUid = null;     // Anonymous Auth UID
+  let voterId = null;        // IP + OS негізіндегі fingerprint (немесе fallback)
+
+  // ---------- IP + OS fingerprint ----------
+  function detectOS(){
+    const ua = navigator.userAgent;
+    if(/Android/i.test(ua))            return "Android";
+    if(/iPhone|iPad|iPod/i.test(ua))   return "iOS";
+    if(/Windows/i.test(ua))            return "Windows";
+    if(/Mac OS X|Macintosh/i.test(ua)) return "macOS";
+    if(/Linux/i.test(ua))              return "Linux";
+    return "Other";
+  }
+
+  async function fetchPublicIP(){
+    const sources = [
+      "https://api.ipify.org?format=json",
+      "https://api64.ipify.org?format=json",
+      "https://ipapi.co/json/"
+    ];
+    for(const url of sources){
+      try{
+        const ctrl = new AbortController();
+        const t = setTimeout(()=>ctrl.abort(), 4000);
+        const res = await fetch(url, {cache:"no-store", signal:ctrl.signal});
+        clearTimeout(t);
+        const data = await res.json();
+        if(data.ip) return data.ip;
+      }catch{}
+    }
+    return null;
+  }
+
+  async function sha256(text){
+    const buf = await crypto.subtle.digest("SHA-256", new TextEncoder().encode(text));
+    return Array.from(new Uint8Array(buf)).map(b => b.toString(16).padStart(2,"0")).join("");
+  }
+
+  async function buildVoterId(){
+    const os = detectOS();
+    const ip = await fetchPublicIP();
+    if(ip){
+      // Бір IP + бір OS = бір дауыс. Browser data тазалау көмектеспейді.
+      const hash = await sha256(ip + "__" + os);
+      return "fp_" + hash.slice(0, 28);
+    }
+    // Fallback: IP алынбаса, тұрақты локал ID (әлсіз қорғаныс)
+    let local = localStorage.getItem("voter_local_id_v1");
+    if(!local){
+      local = "loc_" + Math.random().toString(36).slice(2,10) + Date.now().toString(36);
+      localStorage.setItem("voter_local_id_v1", local);
+    }
+    return local;
+  }
 
   document.getElementById("year").textContent = new Date().getFullYear();
   document.getElementById("totalNurses").textContent = NURSES.length;
@@ -956,13 +1003,17 @@
 
   document.getElementById("confirmBtn").addEventListener("click", async ()=>{
     if(!pendingId || alreadyVoted) return;
-    if(!currentUid){ alert("Аутентификация күтілуде. Бір секундтан кейін қайталаңыз."); return; }
+    if(!voterId){
+      // IP әлі алынбады — қазір жылдам алып көрейік
+      voterId = await buildVoterId();
+    }
+    if(!voterId){ alert("Желі қатесі. Интернетті тексеріп қайталаңыз."); return; }
     const id = pendingId;
     const btn = document.getElementById("confirmBtn");
     btn.disabled = true; btn.textContent = "Сақталуда...";
     try{
       const nurseRef = doc(db, "Voise", id);
-      const voterRef = doc(db, "voters", currentUid);
+      const voterRef = doc(db, "voters", voterId);
 
       await runTransaction(db, async (tx)=>{
         const voterSnap = await tx.get(voterRef);
@@ -975,7 +1026,12 @@
         } else {
           tx.update(nurseRef, { votes: (nurseSnap.data().votes||0) + 1 });
         }
-        tx.set(voterRef, { nurseId:id, votedAt: serverTimestamp() });
+        tx.set(voterRef, {
+          nurseId:id,
+          votedAt: serverTimestamp(),
+          os: detectOS(),
+          ua: navigator.userAgent.slice(0,200)
+        });
       });
 
       localStorage.setItem(VOTE_KEY, id);
@@ -989,10 +1045,9 @@
     }catch(err){
       console.error("[vote] қате:", err);
       if(err.message === "ALREADY_VOTED"){
-        alert("Сіз бұрын дауыс берген екенсіз. Бір құрылғыдан тек бір рет дауыс беруге болады.");
-        // серверде дауысы бар, бірақ localStorage-да жоқ — синхронизация
+        alert("Бұл құрылғыдан (немесе осы желідегі осы ОЖ-ден) бұрын дауыс берілген. Бір рет қана дауыс беруге болады.");
         try{
-          const v = await getDoc(doc(db, "voters", currentUid));
+          const v = await getDoc(doc(db, "voters", voterId));
           if(v.exists()){
             votedFor = v.data().nurseId;
             localStorage.setItem(VOTE_KEY, votedFor);
@@ -1011,31 +1066,11 @@
 
   function escapeHtml(s){ return String(s||"").replace(/[&<>"']/g,m=>({ "&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;" }[m])); }
 
-  // ---------- Anonymous Auth ----------
-  function ensureAuth(){
-    return new Promise((resolve)=>{
-      onAuthStateChanged(auth, async (user)=>{
-        if(user){
-          currentUid = user.uid;
-          resolve(user);
-        } else {
-          try{
-            const cred = await signInAnonymously(auth);
-            currentUid = cred.user.uid;
-            resolve(cred.user);
-          }catch(err){
-            console.error("[auth] Anonymous sign-in қатесі:", err);
-            resolve(null);
-          }
-        }
-      });
-    });
-  }
-
+  // ---------- Серверден дауыс мәртебесін тексеру ----------
   async function checkAlreadyVoted(){
-    if(!currentUid) return;
+    if(!voterId) return;
     try{
-      const snap = await getDoc(doc(db, "voters", currentUid));
+      const snap = await getDoc(doc(db, "voters", voterId));
       if(snap.exists()){
         votedFor = snap.data().nurseId;
         alreadyVoted = true;
@@ -1047,24 +1082,24 @@
         localStorage.removeItem(VOTE_KEY);
       }
     }catch(err){
-      console.warn("[auth] voters тексеру қатесі:", err.code || err.message);
+      console.warn("[voters] тексеру қатесі:", err.code || err.message);
     }
   }
 
   // ---------- Іске қосу ----------
   (async function init(){
-    // 1) Карточкаларды лезде көрсету — фото URL-дері дайын, Firebase күтілмейді
+    // 1) Карточкаларды лезде көрсету — фото URL-дері дайын, желі күтілмейді
     render();
 
     // 2) Live дауыстар — фон жұмысы ретінде бастаймыз
     listenVotes();
 
-    // 3) Auth + voters тексеру — параллель, бірақ render-ден кейін
-    requestIdleCallback ? requestIdleCallback(initAuthFlow, {timeout:1200}) : setTimeout(initAuthFlow, 0);
+    // 3) IP+OS fingerprint құру + voters тексеру — фон режимінде
+    requestIdleCallback ? requestIdleCallback(initVoterFlow, {timeout:1500}) : setTimeout(initVoterFlow, 0);
   })();
 
-  async function initAuthFlow(){
-    await ensureAuth();
+  async function initVoterFlow(){
+    voterId = await buildVoterId();
     await checkAlreadyVoted();
     lastSignature = "";
     render();
