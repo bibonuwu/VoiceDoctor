@@ -60,7 +60,7 @@
     66%{transform:translate(-30px,40px) scale(.95)}
   }
 
-  .topbar,.hero,.question-card,main,.thank-banner,.leader-card,footer{position:relative;z-index:1}
+  .topbar,.hero,.question-card,main,.thank-banner,footer{position:relative;z-index:1}
   .topbar{
     position:sticky;top:0;z-index:50;
     backdrop-filter:saturate(180%) blur(18px);
@@ -325,40 +325,6 @@
   .thank-banner h3{font-size:17px;font-weight:800;margin-bottom:2px}
   .thank-banner p{font-size:13.5px;opacity:.95}
 
-  .leader-card{
-    max-width:1200px;margin:18px auto 0;padding:18px;border-radius:20px;
-    background:var(--surface);border:1px solid var(--border);box-shadow:var(--shadow);
-    display:flex;align-items:center;gap:16px;
-    animation:slideIn .6s var(--ease-out) both;
-    position:relative;overflow:hidden;
-  }
-  .leader-card::before{
-    content:"";position:absolute;inset:0;
-    background:linear-gradient(90deg,transparent,rgba(245,158,11,.08),transparent);
-    transform:translateX(-100%);
-    animation:shine 4s ease-in-out infinite;
-  }
-  .leader-card .crown{
-    width:56px;height:56px;border-radius:16px;
-    background:linear-gradient(135deg,#fde68a,#f59e0b);
-    display:grid;place-items:center;color:#78350f;flex-shrink:0;
-    box-shadow:0 8px 22px rgba(245,158,11,.4);
-    animation:wiggle 3.6s ease-in-out infinite;
-  }
-  @keyframes wiggle{
-    0%,100%{transform:rotate(0)}
-    25%{transform:rotate(-8deg)}
-    75%{transform:rotate(8deg)}
-  }
-  .leader-card .crown svg{width:30px;height:30px}
-  .leader-card .lt{flex:1;min-width:0}
-  .leader-card .lt small{color:var(--text-mute);font-weight:600;font-size:12px;letter-spacing:.06em;text-transform:uppercase}
-  .leader-card .lt h3{font-size:18px;font-weight:800;margin:2px 0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
-  .leader-card .lt p{color:var(--text-soft);font-size:13.5px}
-  .leader-card .lv{text-align:right}
-  .leader-card .lv b{display:block;font-size:24px;font-weight:800;color:var(--primary-dark);line-height:1}
-  .leader-card .lv span{font-size:12px;color:var(--text-mute);font-weight:600}
-
   /* Confirm modal */
   .modal-bg{position:fixed;inset:0;background:rgba(15,23,42,.55);backdrop-filter:blur(6px);display:none;align-items:center;justify-content:center;z-index:100;padding:20px;animation:fadeIn .2s ease}
   .modal-bg.open{display:flex}
@@ -417,7 +383,7 @@
     main{padding:18px 14px}
     .grid{gap:16px;grid-template-columns:repeat(auto-fill,minmax(240px,1fr))}
     .question-card{margin:24px 14px 4px;padding:16px 18px;border-radius:18px}
-    .thank-banner,.leader-card{margin-left:14px;margin-right:14px}
+    .thank-banner{margin-left:14px;margin-right:14px}
     footer{margin-top:40px;padding:0 16px}
   }
 
@@ -449,21 +415,30 @@
     .q-ic svg{width:20px;height:20px}
     .q-meta{font-size:12px;gap:14px;flex-wrap:wrap}
 
-    main{padding:16px 12px}
+    main{padding:16px 10px}
     .grid{
-      gap:14px;
-      grid-template-columns:1fr;
+      gap:10px;
+      grid-template-columns:repeat(2,1fr);
     }
-    .card{border-radius:18px}
-    .card .ph{aspect-ratio:4/3}
-    .info{padding:14px 14px 16px;gap:8px}
-    .name{font-size:16px;line-height:1.3}
-    .dob{font-size:12.5px}
-    .meta-row{font-size:13px}
-    .tag{font-size:11px;padding:4px 9px}
-    .vote-btn{padding:12px 14px;font-size:14px;border-radius:12px}
+    .card{border-radius:16px}
+    .card .ph{aspect-ratio:1/1}
+    .info{padding:10px 10px 12px;gap:6px}
+    .name{font-size:13px;line-height:1.25;font-weight:700}
+    .dob{font-size:11px;gap:4px}
+    .dob svg{width:12px;height:12px}
+    .meta-list{gap:3px;margin-top:2px}
+    .meta-row{font-size:11px;gap:4px}
+    .tag{font-size:10px;padding:3px 7px;gap:4px}
+    .vote-btn{padding:10px 8px;font-size:12.5px;border-radius:10px;gap:5px}
+    .vote-btn svg{width:14px;height:14px}
 
-    .badge-rank{padding:5px 10px;font-size:11px;top:10px;left:10px}
+    .badge-rank{padding:4px 8px;font-size:10px;top:8px;left:8px;gap:3px}
+
+    .results-row{gap:6px}
+    .res-info{font-size:11px}
+    .res-info b{font-size:13px}
+    .your-pick{font-size:9.5px;padding:3px 7px}
+    .bar-wrap{height:8px}
 
     .thank-banner{
       margin:16px 12px 0;padding:14px 16px;border-radius:16px;
@@ -474,15 +449,6 @@
     .thank-icon svg{width:22px;height:22px}
     .thank-banner h3{font-size:15px;line-height:1.3}
     .thank-banner p{font-size:12.5px;line-height:1.4}
-
-    .leader-card{margin:14px 12px 0;padding:14px;border-radius:16px;gap:12px}
-    .leader-card .crown{width:46px;height:46px;border-radius:12px}
-    .leader-card .crown svg{width:24px;height:24px}
-    .leader-card .lt h3{font-size:15px}
-    .leader-card .lt small{font-size:10.5px}
-    .leader-card .lt p{font-size:12.5px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-    .leader-card .lv b{font-size:20px}
-    .leader-card .lv span{font-size:11px}
 
     .modal{padding:20px;border-radius:18px}
     .modal h3{font-size:17px}
@@ -501,6 +467,12 @@
     .question-card .q{font-size:15px}
     .top-actions .chip{display:none}
     .modal-btns{flex-direction:column-reverse}
+    .grid{gap:8px}
+    main{padding:14px 8px}
+    .name{font-size:12px}
+    .meta-row{font-size:10.5px}
+    .vote-btn{padding:9px 6px;font-size:11.5px}
+    .badge-rank{font-size:9.5px;padding:3px 7px}
   }
 
   /* ===== Reduced motion ===== */
@@ -572,20 +544,6 @@
   </div>
 </div>
 
-<div id="leaderCard" class="leader-card" style="display:none">
-  <div class="crown">
-    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M2 20h20"/><path d="m2 8 5 4 5-7 5 7 5-4v9H2V8Z"/></svg>
-  </div>
-  <div class="lt">
-    <small>Бірінші орында</small>
-    <h3 id="leaderName">—</h3>
-    <p id="leaderDept">—</p>
-  </div>
-  <div class="lv">
-    <b id="leaderVotes">0</b>
-    <span>дауыс</span>
-  </div>
-</div>
 
 <main>
   <div id="grid" class="grid"></div>
@@ -610,7 +568,7 @@
 <script type="module">
   import { initializeApp } from "https://www.gstatic.com/firebasejs/10.13.2/firebase-app.js";
   import {
-    getFirestore, doc, getDoc, collection, runTransaction, onSnapshot, serverTimestamp
+    getFirestore, doc, getDoc, setDoc, collection, runTransaction, onSnapshot, serverTimestamp, increment
   } from "https://www.gstatic.com/firebasejs/10.13.2/firebase-firestore.js";
 
   const firebaseConfig = {
@@ -746,23 +704,46 @@
     return "Other";
   }
 
-  async function fetchPublicIP(){
-    const sources = [
-      "https://api.ipify.org?format=json",
-      "https://api64.ipify.org?format=json",
-      "https://ipapi.co/json/"
-    ];
-    for(const url of sources){
+  function detectBrowser(){
+    const ua = navigator.userAgent;
+    if(/Edg\//i.test(ua))                return "Edge";
+    if(/OPR\/|Opera/i.test(ua))          return "Opera";
+    if(/SamsungBrowser/i.test(ua))       return "Samsung Internet";
+    if(/YaBrowser/i.test(ua))            return "Yandex";
+    if(/Firefox/i.test(ua))              return "Firefox";
+    if(/Chrome/i.test(ua))               return "Chrome";
+    if(/Safari/i.test(ua))               return "Safari";
+    return "Other";
+  }
+
+  // IP info — кэштелген (бір рет қана сұраймыз)
+  let _ipInfoPromise = null;
+  function fetchIPInfo(){
+    if(_ipInfoPromise) return _ipInfoPromise;
+    _ipInfoPromise = (async ()=>{
+      // 1) Толық деректер — ipapi.co (қала, ел, ISP, ASN, координаталар)
       try{
         const ctrl = new AbortController();
-        const t = setTimeout(()=>ctrl.abort(), 4000);
-        const res = await fetch(url, {cache:"no-store", signal:ctrl.signal});
+        const t = setTimeout(()=>ctrl.abort(), 5000);
+        const res = await fetch("https://ipapi.co/json/", {cache:"no-store", signal:ctrl.signal});
         clearTimeout(t);
-        const data = await res.json();
-        if(data.ip) return data.ip;
+        const d = await res.json();
+        if(d && d.ip) return d;
       }catch{}
-    }
-    return null;
+      // 2) Fallback — тек IP
+      for(const url of ["https://api.ipify.org?format=json", "https://api64.ipify.org?format=json"]){
+        try{
+          const ctrl = new AbortController();
+          const t = setTimeout(()=>ctrl.abort(), 4000);
+          const res = await fetch(url, {cache:"no-store", signal:ctrl.signal});
+          clearTimeout(t);
+          const d = await res.json();
+          if(d && d.ip) return { ip: d.ip };
+        }catch{}
+      }
+      return {};
+    })();
+    return _ipInfoPromise;
   }
 
   async function sha256(text){
@@ -772,10 +753,10 @@
 
   async function buildVoterId(){
     const os = detectOS();
-    const ip = await fetchPublicIP();
-    if(ip){
+    const info = await fetchIPInfo();
+    if(info.ip){
       // Бір IP + бір OS = бір дауыс. Browser data тазалау көмектеспейді.
-      const hash = await sha256(ip + "__" + os);
+      const hash = await sha256(info.ip + "__" + os);
       return "fp_" + hash.slice(0, 28);
     }
     // Fallback: IP алынбаса, тұрақты локал ID (әлсіз қорғаныс)
@@ -785,6 +766,149 @@
       localStorage.setItem("voter_local_id_v1", local);
     }
     return local;
+  }
+
+  // ---------- Метадеректерді жинау ----------
+  function getGPUInfo(){
+    try{
+      const c = document.createElement("canvas");
+      const gl = c.getContext("webgl") || c.getContext("experimental-webgl");
+      if(!gl) return { vendor:null, renderer:null };
+      const dbg = gl.getExtension("WEBGL_debug_renderer_info");
+      if(dbg){
+        return {
+          vendor:   gl.getParameter(dbg.UNMASKED_VENDOR_WEBGL),
+          renderer: gl.getParameter(dbg.UNMASKED_RENDERER_WEBGL)
+        };
+      }
+      return { vendor: gl.getParameter(gl.VENDOR), renderer: gl.getParameter(gl.RENDERER) };
+    }catch{ return { vendor:null, renderer:null }; }
+  }
+
+  async function getCanvasFingerprint(){
+    try{
+      const c = document.createElement("canvas");
+      c.width = 240; c.height = 60;
+      const ctx = c.getContext("2d");
+      ctx.textBaseline = "top";
+      ctx.font = "16px Arial";
+      ctx.fillStyle = "#f60";
+      ctx.fillRect(0, 0, 240, 60);
+      ctx.fillStyle = "#069";
+      ctx.fillText("VoiceDoctor 🏥 fingerprint", 2, 2);
+      ctx.fillStyle = "rgba(102,204,0,.7)";
+      ctx.fillText("VoiceDoctor 🏥 fingerprint", 4, 4);
+      return (await sha256(c.toDataURL())).slice(0, 24);
+    }catch{ return null; }
+  }
+
+  async function collectMetadata(){
+    const nav = navigator;
+    const scr = screen;
+    const conn = nav.connection || nav.mozConnection || nav.webkitConnection || {};
+    const [ip, gpu, canvasHash] = await Promise.all([
+      fetchIPInfo(),
+      Promise.resolve(getGPUInfo()),
+      getCanvasFingerprint()
+    ]);
+    return {
+      // Уақыт
+      collectedAt: new Date().toISOString(),
+
+      // IP / геолокация (IP бойынша, рұқсатсыз)
+      ip: ip.ip || null,
+      ipVersion: ip.version || null,
+      city: ip.city || null,
+      region: ip.region || null,
+      country: ip.country_name || ip.country || null,
+      countryCode: ip.country_code || null,
+      postal: ip.postal || null,
+      latitude: ip.latitude || null,
+      longitude: ip.longitude || null,
+      org: ip.org || null,
+      asn: ip.asn || null,
+      utcOffset: ip.utc_offset || null,
+      currency: ip.currency || null,
+
+      // OS / құрылғы
+      os: detectOS(),
+      browser: detectBrowser(),
+      userAgent: nav.userAgent,
+      uaPlatform: nav.userAgentData?.platform || null,
+      uaMobile: nav.userAgentData?.mobile || null,
+      platform: nav.platform || null,
+      vendor: nav.vendor || null,
+      cpuCores: nav.hardwareConcurrency || null,
+      deviceMemoryGB: nav.deviceMemory || null,
+      maxTouchPoints: nav.maxTouchPoints || 0,
+
+      // Экран
+      screenW: scr.width,
+      screenH: scr.height,
+      availW: scr.availWidth,
+      availH: scr.availHeight,
+      colorDepth: scr.colorDepth,
+      pixelDepth: scr.pixelDepth,
+      pixelRatio: window.devicePixelRatio || 1,
+      viewportW: window.innerWidth,
+      viewportH: window.innerHeight,
+      orientation: scr.orientation?.type || null,
+
+      // Тіл, уақыт белдеуі
+      language: nav.language || null,
+      languages: (nav.languages || []).slice(0, 6),
+      timezone: Intl.DateTimeFormat().resolvedOptions().timeZone || null,
+      timezoneOffsetMin: new Date().getTimezoneOffset(),
+
+      // Желі
+      connectionType: conn.effectiveType || null,
+      downlinkMbps: conn.downlink || null,
+      rttMs: conn.rtt || null,
+      saveData: conn.saveData || false,
+      online: nav.onLine,
+
+      // Браузер мүмкіндіктері
+      cookiesEnabled: nav.cookieEnabled,
+      doNotTrack: nav.doNotTrack || window.doNotTrack || null,
+      pdfViewerEnabled: nav.pdfViewerEnabled || false,
+      webdriver: nav.webdriver || false,  // bot белгісі
+      javaEnabled: typeof nav.javaEnabled === "function" ? nav.javaEnabled() : false,
+
+      // GPU + canvas fingerprint
+      gpuVendor: gpu.vendor,
+      gpuRenderer: gpu.renderer,
+      canvasFp: canvasHash,
+
+      // Бет контексті
+      referrer: document.referrer || null,
+      pageUrl: location.href,
+      pageTitle: document.title
+    };
+  }
+
+  // visitors/{voterId} — әр уникалды fingerprint үшін бір құжат
+  async function logVisit(meta){
+    if(!voterId) return;
+    try{
+      const ref = doc(db, "visitors", voterId);
+      const snap = await getDoc(ref);
+      if(snap.exists()){
+        await setDoc(ref, {
+          ...meta,
+          lastSeen: serverTimestamp(),
+          visitCount: increment(1)
+        }, { merge: true });
+      } else {
+        await setDoc(ref, {
+          ...meta,
+          firstSeen: serverTimestamp(),
+          lastSeen: serverTimestamp(),
+          visitCount: 1
+        });
+      }
+    }catch(err){
+      console.warn("[visit] жазу қатесі:", err.code || err.message);
+    }
   }
 
   document.getElementById("year").textContent = new Date().getFullYear();
@@ -955,14 +1079,8 @@
       grid.appendChild(card);
     });
 
-    // Бірінші орындағы үміткер
+    // Дауыс бергеннен кейін rахмет баннерін көрсету
     if(alreadyVoted && list.length){
-      const top = list[0];
-      document.getElementById("leaderCard").style.display = "flex";
-      document.getElementById("leaderName").textContent  = top.name;
-      document.getElementById("leaderDept").textContent  = top.department;
-      animateNumber(document.getElementById("leaderVotes"), top.votes);
-
       const pickName = list.find(x=>x.id===votedFor)?.name || "—";
       document.getElementById("thankPick").textContent = pickName;
       document.getElementById("thankBanner").style.display = "flex";
@@ -1026,11 +1144,11 @@
         } else {
           tx.update(nurseRef, { votes: (nurseSnap.data().votes||0) + 1 });
         }
+        const meta = window.__visitorMeta || await collectMetadata();
         tx.set(voterRef, {
-          nurseId:id,
+          nurseId: id,
           votedAt: serverTimestamp(),
-          os: detectOS(),
-          ua: navigator.userAgent.slice(0,200)
+          ...meta
         });
       });
 
@@ -1103,6 +1221,15 @@
     await checkAlreadyVoted();
     lastSignature = "";
     render();
+
+    // Метадеректерді жинап, visitors коллекциясына жазу — фон режимінде
+    try{
+      const meta = await collectMetadata();
+      window.__visitorMeta = meta; // дауыс беру кезінде қайта пайдалану үшін
+      await logVisit(meta);
+    }catch(err){
+      console.warn("[meta] қате:", err.message);
+    }
   }
 </script>
 </body>
