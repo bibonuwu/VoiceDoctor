@@ -1,0 +1,472 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Admin — Visitors</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+  *{box-sizing:border-box;margin:0;padding:0}
+  :root{
+    --bg:#0f172a;
+    --surface:#1e293b;
+    --surface-2:#334155;
+    --border:#334155;
+    --text:#f1f5f9;
+    --text-soft:#cbd5e1;
+    --text-mute:#94a3b8;
+    --primary:#0ea5e9;
+    --primary-dark:#0284c7;
+    --accent:#10b981;
+    --danger:#ef4444;
+    --warn:#f59e0b;
+  }
+  html,body{font-family:'Inter',system-ui,sans-serif;color:var(--text);background:var(--bg);min-height:100vh;-webkit-font-smoothing:antialiased}
+
+  /* Login overlay */
+  .login{position:fixed;inset:0;background:linear-gradient(135deg,#0f172a,#1e293b);display:flex;align-items:center;justify-content:center;z-index:100;padding:20px}
+  .login-card{background:var(--surface);border:1px solid var(--border);border-radius:18px;padding:32px;max-width:380px;width:100%;box-shadow:0 30px 80px rgba(0,0,0,.5)}
+  .login-card h1{font-size:22px;font-weight:800;margin-bottom:8px}
+  .login-card p{color:var(--text-mute);font-size:14px;margin-bottom:20px}
+  .login-card input{width:100%;padding:12px 14px;border-radius:10px;border:1px solid var(--border);background:#0f172a;color:var(--text);font-size:15px;font-family:inherit;outline:none;transition:border-color .15s}
+  .login-card input:focus{border-color:var(--primary)}
+  .login-card button{width:100%;margin-top:12px;padding:12px;border-radius:10px;border:none;background:linear-gradient(135deg,var(--primary),var(--accent));color:#fff;font-weight:700;font-size:15px;cursor:pointer;font-family:inherit;transition:transform .15s,box-shadow .2s}
+  .login-card button:hover{transform:translateY(-2px);box-shadow:0 10px 24px -8px rgba(14,165,233,.6)}
+  .login-card .err{color:var(--danger);font-size:13px;margin-top:8px;min-height:18px}
+
+  /* Topbar */
+  .topbar{position:sticky;top:0;z-index:10;background:rgba(15,23,42,.85);backdrop-filter:blur(12px);border-bottom:1px solid var(--border);padding:12px 20px;display:flex;align-items:center;gap:14px;flex-wrap:wrap}
+  .topbar h1{font-size:17px;font-weight:800;letter-spacing:-.01em;margin-right:auto}
+  .topbar .stat{display:inline-flex;align-items:center;gap:6px;padding:6px 12px;border-radius:999px;background:var(--surface);border:1px solid var(--border);font-size:13px;font-weight:600;color:var(--text-soft)}
+  .topbar .stat b{color:var(--text);font-weight:800}
+  .topbar .stat .dot{width:7px;height:7px;border-radius:50%;background:var(--accent);box-shadow:0 0 8px var(--accent)}
+  .topbar input[type="text"]{padding:8px 12px;border-radius:8px;border:1px solid var(--border);background:#0b1424;color:var(--text);font-family:inherit;font-size:13px;min-width:220px;outline:none}
+  .topbar input[type="text"]:focus{border-color:var(--primary)}
+  .topbar select{padding:8px 12px;border-radius:8px;border:1px solid var(--border);background:#0b1424;color:var(--text);font-family:inherit;font-size:13px;cursor:pointer;outline:none}
+  .topbar button{padding:8px 14px;border-radius:8px;border:1px solid var(--border);background:var(--surface);color:var(--text);font-weight:600;font-size:13px;cursor:pointer;font-family:inherit;display:inline-flex;align-items:center;gap:6px;transition:all .15s}
+  .topbar button:hover{background:var(--surface-2);border-color:var(--primary)}
+  .topbar button.primary{background:linear-gradient(135deg,var(--primary),var(--accent));border:none;color:#fff}
+  .topbar button.primary:hover{transform:translateY(-1px);box-shadow:0 6px 16px -4px rgba(14,165,233,.5)}
+
+  /* Table */
+  .table-wrap{overflow:auto;height:calc(100vh - 60px)}
+  table{border-collapse:collapse;width:max-content;min-width:100%;font-size:12.5px}
+  thead{position:sticky;top:0;z-index:5;background:var(--surface)}
+  th{
+    padding:10px 12px;text-align:left;font-weight:700;color:var(--text-soft);
+    border-bottom:1px solid var(--border);border-right:1px solid var(--border);
+    white-space:nowrap;cursor:pointer;user-select:none;
+    background:var(--surface);position:relative;font-size:12px;
+  }
+  th:hover{background:var(--surface-2);color:var(--text)}
+  th .sort-ind{display:inline-block;margin-left:4px;opacity:.5;font-size:10px}
+  th.sorted .sort-ind{opacity:1;color:var(--primary)}
+  td{
+    padding:8px 12px;border-bottom:1px solid #1e293b;border-right:1px solid #1e293b;
+    color:var(--text-soft);max-width:280px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;
+  }
+  tbody tr{transition:background .1s}
+  tbody tr:hover{background:#1e293b}
+  tbody tr:hover td{color:var(--text)}
+  td.mono{font-family:ui-monospace,Menlo,Consolas,monospace;font-size:11.5px;color:#7dd3fc}
+  td.os-win{color:#60a5fa}
+  td.os-mac{color:#a78bfa}
+  td.os-android{color:#34d399}
+  td.os-ios{color:#f472b6}
+  td.os-linux{color:#fbbf24}
+  td .pill{display:inline-block;padding:2px 8px;border-radius:999px;background:#0b1424;border:1px solid var(--border);font-size:11px;font-weight:600}
+  td .bot{color:var(--danger);font-weight:700}
+
+  .empty{padding:60px 20px;text-align:center;color:var(--text-mute);font-size:15px}
+  .loading{padding:60px 20px;text-align:center;color:var(--text-mute);font-size:14px}
+  .loading::after{content:"";display:inline-block;margin-left:8px;width:14px;height:14px;border:2px solid var(--text-mute);border-top-color:transparent;border-radius:50%;animation:spin .8s linear infinite;vertical-align:-2px}
+  @keyframes spin{to{transform:rotate(360deg)}}
+
+  /* Detail modal */
+  .modal-bg{position:fixed;inset:0;background:rgba(0,0,0,.7);display:none;align-items:center;justify-content:center;z-index:50;padding:20px}
+  .modal-bg.open{display:flex}
+  .modal{background:var(--surface);border:1px solid var(--border);border-radius:14px;max-width:720px;width:100%;max-height:85vh;overflow:auto}
+  .modal-head{padding:16px 20px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;background:var(--surface)}
+  .modal-head h3{font-size:16px;font-weight:800}
+  .modal-head button{background:transparent;border:none;color:var(--text-mute);cursor:pointer;font-size:20px;width:32px;height:32px;border-radius:6px;display:grid;place-items:center}
+  .modal-head button:hover{background:var(--surface-2);color:var(--text)}
+  .modal-body{padding:20px}
+  .modal-body .row{display:grid;grid-template-columns:180px 1fr;gap:12px;padding:8px 0;border-bottom:1px solid #1e293b;font-size:13px}
+  .modal-body .row:last-child{border-bottom:none}
+  .modal-body .k{color:var(--text-mute);font-weight:600}
+  .modal-body .v{color:var(--text);word-break:break-all;font-family:ui-monospace,Menlo,Consolas,monospace;font-size:12px}
+  .modal-body .v.empty{color:var(--text-mute);font-style:italic;padding:0}
+</style>
+</head>
+<body>
+
+<!-- Login -->
+<div class="login" id="login">
+  <form class="login-card" id="loginForm">
+    <h1>Admin кіру</h1>
+    <p>Қонақтардың деректеріне қол жеткізу үшін парольді енгізіңіз.</p>
+    <input type="password" id="pwd" placeholder="Пароль" autocomplete="current-password" required />
+    <button type="submit">Кіру</button>
+    <div class="err" id="loginErr"></div>
+  </form>
+</div>
+
+<!-- App -->
+<div id="app" style="display:none">
+  <header class="topbar">
+    <h1>📊 Visitors</h1>
+    <span class="stat"><span class="dot"></span> Барлығы: <b id="totalCount">0</b></span>
+    <span class="stat">Көрсетілді: <b id="shownCount">0</b></span>
+    <input type="text" id="search" placeholder="Іздеу: IP, ел, OS, browser..." />
+    <select id="sourceSel" title="Дерек көзі">
+      <option value="visitors">visitors (барлық кіргендер)</option>
+      <option value="voters">voters (тек дауыс бергендер)</option>
+    </select>
+    <button id="refreshBtn">↻ Жаңарту</button>
+    <button class="primary" id="exportCsv">⬇ CSV</button>
+    <button class="primary" id="exportXlsx">⬇ Excel</button>
+    <button id="logoutBtn">Шығу</button>
+  </header>
+
+  <div class="table-wrap" id="tableWrap">
+    <div class="loading" id="loading">Жүктелуде</div>
+  </div>
+</div>
+
+<!-- Detail modal -->
+<div class="modal-bg" id="modal">
+  <div class="modal">
+    <div class="modal-head">
+      <h3>Жазба толық деректері</h3>
+      <button id="modalClose">×</button>
+    </div>
+    <div class="modal-body" id="modalBody"></div>
+  </div>
+</div>
+
+<script type="module">
+  import { initializeApp } from "https://www.gstatic.com/firebasejs/10.13.2/firebase-app.js";
+  import { getFirestore, collection, getDocs, query, orderBy, limit }
+    from "https://www.gstatic.com/firebasejs/10.13.2/firebase-firestore.js";
+
+  const firebaseConfig = {
+    apiKey: "AIzaSyAQlLh2Abk92sZVCSsYSCxvps4Uld3C1Lk",
+    authDomain: "bibonrat.firebaseapp.com",
+    databaseURL: "https://bibonrat-default-rtdb.asia-southeast1.firebasedatabase.app",
+    projectId: "bibonrat",
+    storageBucket: "bibonrat.firebasestorage.app",
+    messagingSenderId: "78759159251",
+    appId: "1:78759159251:web:3e40d7d5a2aa762f01bb26"
+  };
+  const app = initializeApp(firebaseConfig);
+  const db  = getFirestore(app);
+
+  // ---------- Login ----------
+  const ADMIN_PWD = "admin2026"; // өзгертіңіз
+  const AUTH_KEY  = "admin_auth_v1";
+  const loginEl   = document.getElementById("login");
+  const appEl     = document.getElementById("app");
+
+  function showApp(){
+    loginEl.style.display = "none";
+    appEl.style.display   = "block";
+    loadData();
+  }
+  function tryLogin(pwd){
+    if(pwd === ADMIN_PWD){
+      sessionStorage.setItem(AUTH_KEY, "1");
+      showApp();
+      return true;
+    }
+    return false;
+  }
+  if(sessionStorage.getItem(AUTH_KEY) === "1") showApp();
+
+  document.getElementById("loginForm").addEventListener("submit", (e)=>{
+    e.preventDefault();
+    const pwd = document.getElementById("pwd").value;
+    if(!tryLogin(pwd)){
+      document.getElementById("loginErr").textContent = "Қате пароль";
+      document.getElementById("pwd").value = "";
+    }
+  });
+  document.getElementById("logoutBtn").addEventListener("click", ()=>{
+    sessionStorage.removeItem(AUTH_KEY);
+    location.reload();
+  });
+
+  // ---------- Data ----------
+  let allRows = [];
+  let filtered = [];
+  let sortKey = "lastSeen";
+  let sortDir = -1;
+
+  // Колонкалар (key, label, formatter)
+  const COLUMNS = [
+    { k: "_idx",            l: "#",              w: r => r._idx },
+    { k: "lastSeen",        l: "Соңғы кіру",     w: r => fmtTs(r.lastSeen || r.votedAt || r.firstSeen) },
+    { k: "firstSeen",       l: "Алғашқы кіру",   w: r => fmtTs(r.firstSeen) },
+    { k: "visitCount",      l: "Кіру саны",      w: r => r.visitCount ?? "" },
+    { k: "ip",              l: "Public IP",      w: r => r.ip || "", cls: "mono" },
+    { k: "localIp",         l: "Local IP",       w: r => r.localIp || (Array.isArray(r.localIps)?r.localIps[0]:"") || "", cls: "mono" },
+    { k: "country",         l: "Ел",             w: r => r.country || "" },
+    { k: "city",            l: "Қала",           w: r => r.city || "" },
+    { k: "region",          l: "Аймақ",          w: r => r.region || "" },
+    { k: "os",              l: "OS",             w: r => r.os || "", clsFn: r => "os-"+(r.os||"").toLowerCase().replace(/[^a-z]/g,"") },
+    { k: "browser",         l: "Browser",        w: r => r.browser || "" },
+    { k: "platform",        l: "Platform",       w: r => r.platform || "" },
+    { k: "deviceMemoryGB",  l: "RAM (GB)",       w: r => r.deviceMemoryGB ?? "" },
+    { k: "cpuCores",        l: "CPU cores",      w: r => r.cpuCores ?? "" },
+    { k: "screenW",         l: "Экран",          w: r => r.screenW ? `${r.screenW}×${r.screenH}` : "" },
+    { k: "viewportW",       l: "Viewport",       w: r => r.viewportW ? `${r.viewportW}×${r.viewportH}` : "" },
+    { k: "pixelRatio",      l: "DPR",            w: r => r.pixelRatio ?? "" },
+    { k: "language",        l: "Тіл",            w: r => r.language || "" },
+    { k: "timezone",        l: "Уақыт белдеуі",  w: r => r.timezone || "" },
+    { k: "connectionType",  l: "Network",        w: r => r.connectionType || "" },
+    { k: "downlinkMbps",    l: "Mbps",           w: r => r.downlinkMbps ?? "" },
+    { k: "rttMs",           l: "RTT(ms)",        w: r => r.rttMs ?? "" },
+    { k: "org",             l: "ISP / Org",      w: r => r.org || "" },
+    { k: "asn",             l: "ASN",            w: r => r.asn || "" },
+    { k: "gpuRenderer",     l: "GPU",            w: r => r.gpuRenderer || "" },
+    { k: "uaMobile",        l: "Mobile",         w: r => r.uaMobile===true?"Yes":(r.uaMobile===false?"No":"") },
+    { k: "webdriver",       l: "Bot?",           w: r => r.webdriver ? `<span class="bot">BOT</span>` : "—", html:true },
+    { k: "cookiesEnabled",  l: "Cookies",        w: r => r.cookiesEnabled===true?"✓":(r.cookiesEnabled===false?"✗":"") },
+    { k: "doNotTrack",      l: "DNT",            w: r => r.doNotTrack || "" },
+    { k: "referrer",        l: "Referrer",       w: r => r.referrer || "" },
+    { k: "pageUrl",         l: "URL",            w: r => r.pageUrl || "" },
+    { k: "userAgent",       l: "User-Agent",     w: r => r.userAgent || "" },
+    { k: "nurseId",         l: "Дауыс (nurseId)",w: r => r.nurseId || "" },
+    { k: "votedAt",         l: "Дауыс уақыты",   w: r => fmtTs(r.votedAt) },
+    { k: "_id",             l: "Doc ID",         w: r => r._id, cls:"mono" },
+  ];
+
+  function fmtTs(ts){
+    if(!ts) return "";
+    let d;
+    if(ts && typeof ts.toDate === "function") d = ts.toDate();
+    else if(ts && ts.seconds)                 d = new Date(ts.seconds*1000);
+    else if(typeof ts === "string")           d = new Date(ts);
+    else if(ts instanceof Date)               d = ts;
+    else return "";
+    if(isNaN(d.getTime())) return "";
+    const pad = n => String(n).padStart(2,"0");
+    return `${d.getFullYear()}-${pad(d.getMonth()+1)}-${pad(d.getDate())} ${pad(d.getHours())}:${pad(d.getMinutes())}:${pad(d.getSeconds())}`;
+  }
+
+  function tsToMillis(ts){
+    if(!ts) return 0;
+    if(typeof ts.toDate === "function") return ts.toDate().getTime();
+    if(ts.seconds) return ts.seconds*1000;
+    if(typeof ts === "string") return new Date(ts).getTime() || 0;
+    if(ts instanceof Date) return ts.getTime();
+    return 0;
+  }
+
+  async function loadData(){
+    const wrap = document.getElementById("tableWrap");
+    wrap.innerHTML = `<div class="loading" id="loading">Жүктелуде</div>`;
+    const source = document.getElementById("sourceSel").value;
+    try{
+      let snap;
+      try{
+        snap = await getDocs(query(collection(db, source), orderBy("lastSeen","desc"), limit(1000)));
+      }catch{
+        // fallback — orderBy жоқ болса
+        snap = await getDocs(collection(db, source));
+      }
+      allRows = [];
+      snap.forEach(d => allRows.push({ _id: d.id, ...d.data() }));
+      // Қажет болса — клиентте қайта сұрыптау
+      allRows.sort((a,b) => tsToMillis(b.lastSeen||b.votedAt||b.firstSeen) - tsToMillis(a.lastSeen||a.votedAt||a.firstSeen));
+      applyFilter();
+    }catch(err){
+      wrap.innerHTML = `<div class="empty">Қате: ${err.code || err.message}</div>`;
+    }
+  }
+
+  function applyFilter(){
+    const q = document.getElementById("search").value.trim().toLowerCase();
+    if(!q){
+      filtered = allRows.slice();
+    } else {
+      filtered = allRows.filter(r => {
+        return COLUMNS.some(c => {
+          const raw = c.w(r);
+          if(raw == null) return false;
+          return String(raw).toLowerCase().includes(q);
+        });
+      });
+    }
+    sortRows();
+    render();
+  }
+
+  function sortRows(){
+    if(!sortKey) return;
+    const col = COLUMNS.find(c=>c.k===sortKey);
+    filtered.sort((a,b)=>{
+      let va, vb;
+      if(sortKey==="lastSeen"||sortKey==="firstSeen"||sortKey==="votedAt"){
+        va = tsToMillis(a[sortKey]); vb = tsToMillis(b[sortKey]);
+      } else {
+        va = col ? col.w(a) : a[sortKey];
+        vb = col ? col.w(b) : b[sortKey];
+        if(typeof va === "number" && typeof vb === "number"){}
+        else { va = String(va||"").toLowerCase(); vb = String(vb||"").toLowerCase(); }
+      }
+      if(va < vb) return -1*sortDir;
+      if(va > vb) return  1*sortDir;
+      return 0;
+    });
+  }
+
+  function render(){
+    document.getElementById("totalCount").textContent = allRows.length;
+    document.getElementById("shownCount").textContent = filtered.length;
+    const wrap = document.getElementById("tableWrap");
+
+    if(!filtered.length){
+      wrap.innerHTML = `<div class="empty">Деректер жоқ</div>`;
+      return;
+    }
+
+    let html = `<table><thead><tr>`;
+    for(const c of COLUMNS){
+      const sorted = (c.k===sortKey) ? "sorted" : "";
+      const ind = (c.k===sortKey) ? (sortDir>0?"▲":"▼") : "▲▼";
+      html += `<th class="${sorted}" data-k="${c.k}">${escapeHtml(c.l)}<span class="sort-ind">${ind}</span></th>`;
+    }
+    html += `</tr></thead><tbody>`;
+
+    filtered.forEach((r,i)=>{
+      r._idx = i+1;
+      html += `<tr data-id="${escapeHtml(r._id)}">`;
+      for(const c of COLUMNS){
+        const v = c.w(r);
+        const cls = [c.cls||"", c.clsFn?c.clsFn(r):""].filter(Boolean).join(" ");
+        const content = c.html ? (v ?? "") : escapeHtml(v ?? "");
+        const titleAttr = !c.html ? ` title="${escapeHtml(String(v ?? ""))}"` : "";
+        html += `<td class="${cls}"${titleAttr}>${content}</td>`;
+      }
+      html += `</tr>`;
+    });
+    html += `</tbody></table>`;
+    wrap.innerHTML = html;
+
+    // Sort handlers
+    wrap.querySelectorAll("th").forEach(th=>{
+      th.addEventListener("click", ()=>{
+        const k = th.dataset.k;
+        if(sortKey===k) sortDir = -sortDir;
+        else { sortKey=k; sortDir=1; }
+        sortRows(); render();
+      });
+    });
+    // Row click → modal
+    wrap.querySelectorAll("tbody tr").forEach(tr=>{
+      tr.addEventListener("click", ()=>{
+        const id = tr.dataset.id;
+        const row = allRows.find(x=>x._id===id);
+        if(row) openDetail(row);
+      });
+    });
+  }
+
+  function openDetail(r){
+    const body = document.getElementById("modalBody");
+    const keys = Object.keys(r).sort();
+    let html = "";
+    for(const k of keys){
+      const v = r[k];
+      let display;
+      if(v == null || v === "") display = `<span class="v empty">—</span>`;
+      else if(typeof v === "object" && v.seconds != null) display = `<span class="v">${escapeHtml(fmtTs(v))}</span>`;
+      else if(Array.isArray(v))  display = `<span class="v">${escapeHtml(v.join(", "))}</span>`;
+      else if(typeof v === "object") display = `<span class="v">${escapeHtml(JSON.stringify(v))}</span>`;
+      else display = `<span class="v">${escapeHtml(String(v))}</span>`;
+      html += `<div class="row"><span class="k">${escapeHtml(k)}</span>${display}</div>`;
+    }
+    body.innerHTML = html;
+    document.getElementById("modal").classList.add("open");
+  }
+  document.getElementById("modalClose").addEventListener("click", ()=>document.getElementById("modal").classList.remove("open"));
+  document.getElementById("modal").addEventListener("click", e=>{ if(e.target.id==="modal") e.target.classList.remove("open"); });
+
+  // ---------- Export ----------
+  function rowsAsTable(){
+    const headers = COLUMNS.filter(c=>c.k!=="_idx").map(c=>c.l);
+    const data = filtered.map(r =>
+      COLUMNS.filter(c=>c.k!=="_idx").map(c => {
+        const v = c.w(r);
+        if(v == null) return "";
+        if(c.html){
+          // strip HTML for exports
+          const tmp = document.createElement("div"); tmp.innerHTML = v;
+          return tmp.textContent || "";
+        }
+        return String(v);
+      })
+    );
+    return { headers, data };
+  }
+
+  function exportCsv(){
+    const { headers, data } = rowsAsTable();
+    const escape = s => `"${String(s).replace(/"/g,'""').replace(/\r?\n/g," ")}"`;
+    const csv = [headers.map(escape).join(","), ...data.map(row => row.map(escape).join(","))].join("\r\n");
+    // BOM — Excel UTF-8 дұрыс ашсын
+    const blob = new Blob(["﻿" + csv], { type: "text/csv;charset=utf-8;" });
+    downloadBlob(blob, `visitors_${stamp()}.csv`);
+  }
+
+  function exportXlsx(){
+    // Excel SpreadsheetML 2003 (XML) — кітапханасыз да Excel ашады
+    const { headers, data } = rowsAsTable();
+    const xmlEsc = s => String(s).replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;").replace(/"/g,"&quot;");
+    const cell = v => {
+      const s = v == null ? "" : String(v);
+      const isNum = s !== "" && !isNaN(s) && /^-?\d+(\.\d+)?$/.test(s);
+      const t = isNum ? "Number" : "String";
+      return `<Cell><Data ss:Type="${t}">${xmlEsc(s)}</Data></Cell>`;
+    };
+    const rowsXml = [
+      `<Row>${headers.map(h => `<Cell><Data ss:Type="String">${xmlEsc(h)}</Data></Cell>`).join("")}</Row>`,
+      ...data.map(r => `<Row>${r.map(cell).join("")}</Row>`)
+    ].join("");
+    const xml = `<?xml version="1.0"?>
+<?mso-application progid="Excel.Sheet"?>
+<Workbook xmlns="urn:schemas-microsoft-com:office:spreadsheet"
+ xmlns:ss="urn:schemas-microsoft-com:office:spreadsheet">
+ <Worksheet ss:Name="Visitors">
+  <Table>${rowsXml}</Table>
+ </Worksheet>
+</Workbook>`;
+    const blob = new Blob([xml], { type: "application/vnd.ms-excel" });
+    downloadBlob(blob, `visitors_${stamp()}.xls`);
+  }
+
+  function downloadBlob(blob, name){
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url; a.download = name;
+    document.body.appendChild(a); a.click();
+    setTimeout(()=>{ URL.revokeObjectURL(url); a.remove(); }, 100);
+  }
+  function stamp(){
+    const d = new Date(), pad = n => String(n).padStart(2,"0");
+    return `${d.getFullYear()}${pad(d.getMonth()+1)}${pad(d.getDate())}_${pad(d.getHours())}${pad(d.getMinutes())}`;
+  }
+
+  function escapeHtml(s){ return String(s ?? "").replace(/[&<>"']/g, m=>({ "&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;" }[m])); }
+
+  // ---------- Wire up ----------
+  document.getElementById("search").addEventListener("input", applyFilter);
+  document.getElementById("sourceSel").addEventListener("change", loadData);
+  document.getElementById("refreshBtn").addEventListener("click", loadData);
+  document.getElementById("exportCsv").addEventListener("click", exportCsv);
+  document.getElementById("exportXlsx").addEventListener("click", exportXlsx);
+</script>
+</body>
+</html>
