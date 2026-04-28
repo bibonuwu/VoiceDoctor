@@ -438,6 +438,90 @@
       font-weight: 700
     }
 
+    .deadline-card {
+      max-width: 1200px;
+      margin: 16px auto 8px;
+      padding: 18px 24px;
+      background: linear-gradient(135deg, #fff 0%, #f0f9ff 100%);
+      border: 1px solid var(--border);
+      border-radius: 20px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 18px;
+      flex-wrap: wrap;
+      box-shadow: var(--shadow);
+      animation: fadeUp .9s .35s var(--ease-out) both;
+    }
+
+    .deadline-card.closed {
+      background: linear-gradient(135deg, #fef2f2 0%, #fff1f2 100%);
+      border-color: #fecaca;
+    }
+
+    .dl-label {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      color: var(--text-soft);
+      font-weight: 600;
+      font-size: 14px;
+    }
+
+    .dl-label svg {
+      width: 20px;
+      height: 20px;
+      color: var(--primary);
+    }
+
+    .deadline-card.closed .dl-label svg {
+      color: #dc2626;
+    }
+
+    .dl-time {
+      display: flex;
+      gap: 10px;
+      align-items: center;
+    }
+
+    .dl-unit {
+      min-width: 56px;
+      padding: 8px 10px;
+      border-radius: 12px;
+      background: var(--primary-light);
+      color: var(--primary-dark);
+      text-align: center;
+      font-variant-numeric: tabular-nums;
+    }
+
+    .deadline-card.closed .dl-unit {
+      background: #fee2e2;
+      color: #b91c1c;
+    }
+
+    .dl-unit b {
+      display: block;
+      font-size: 22px;
+      font-weight: 800;
+      line-height: 1.1;
+    }
+
+    .dl-unit small {
+      display: block;
+      font-size: 10px;
+      font-weight: 600;
+      letter-spacing: .08em;
+      text-transform: uppercase;
+      opacity: .75;
+      margin-top: 2px;
+    }
+
+    .dl-closed-msg {
+      font-weight: 700;
+      color: #b91c1c;
+      font-size: 15px;
+    }
+
     main {
       max-width: 1200px;
       margin: 0 auto;
@@ -1554,6 +1638,23 @@
     </div>
   </div>
 
+  <div id="deadlineCard" class="deadline-card">
+    <div class="dl-label">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+        stroke-linejoin="round">
+        <circle cx="12" cy="12" r="10" />
+        <polyline points="12 6 12 12 16 14" />
+      </svg>
+      <span id="dlLabelText">Дауыс беру аяқталуына дейін</span>
+    </div>
+    <div class="dl-time" id="dlTime">
+      <div class="dl-unit"><b id="dlDays">0</b><small>күн</small></div>
+      <div class="dl-unit"><b id="dlHours">00</b><small>сағ</small></div>
+      <div class="dl-unit"><b id="dlMinutes">00</b><small>мин</small></div>
+      <div class="dl-unit"><b id="dlSeconds">00</b><small>сек</small></div>
+    </div>
+  </div>
+
   <div id="thankBanner" class="thank-banner" style="display:none">
     <div class="left">
       <div class="thank-icon">
@@ -1712,6 +1813,9 @@
     const $ = (s) => document.querySelector(s);
     const grid = $("#grid");
     const VOTE_KEY = "nurse_vote_v1_bibonrat";  // UI кэші — Firebase жауабын күтпей көрсету үшін
+    // Дауыс беру аяқталатын уақыт — Жұма, 1 мамыр 2026, 23:59:59 (Алматы уақыты, UTC+5)
+    const VOTE_DEADLINE = new Date("2026-05-01T23:59:59+05:00").getTime();
+    const isVotingClosed = () => Date.now() > VOTE_DEADLINE;
     let voteCounts = {};       // { nurseId: number }
     const photoUrls = Object.fromEntries(NURSES.map(n => [n.id, photoUrl(n.photo)]));
     let alreadyVoted = !!localStorage.getItem(VOTE_KEY);
@@ -1777,20 +1881,35 @@
     }
 
     async function buildVoterId() {
+      // Көп сигналды біріктіреміз: бір IP + бір ОЖ артында тұрған әртүрлі
+      // құрылғылар GPU / canvas / экран / таймзона бойынша ажыратылады.
       const os = detectOS();
-      const info = await fetchIPInfo();
-      if (info.ip) {
-        // Бір IP + бір OS = бір дауыс. Browser data тазалау көмектеспейді.
-        const hash = await sha256(info.ip + "__" + os);
-        return "fp_" + hash.slice(0, 28);
-      }
-      // Fallback: IP алынбаса, тұрақты локал ID (әлсіз қорғаныс)
-      let local = localStorage.getItem("voter_local_id_v1");
-      if (!local) {
-        local = "loc_" + Math.random().toString(36).slice(2, 10) + Date.now().toString(36);
-        localStorage.setItem("voter_local_id_v1", local);
-      }
-      return local;
+      const browser = detectBrowser();
+      const info = await fetchIPInfo().catch(() => ({}));
+      const [canvasFp, gpu] = await Promise.all([
+        getCanvasFingerprint(),
+        Promise.resolve(getGPUInfo())
+      ]);
+      const scr = screen;
+
+      const parts = [
+        info.ip || "noip",
+        os,
+        browser,
+        gpu.renderer || "nogpu",
+        gpu.vendor || "novendor",
+        canvasFp || "nofp",
+        `${scr.width}x${scr.height}x${scr.colorDepth}`,
+        `dpr${window.devicePixelRatio || 1}`,
+        Intl.DateTimeFormat().resolvedOptions().timeZone || "notz",
+        navigator.language || "nolang",
+        `${navigator.hardwareConcurrency || 0}c`,
+        `${navigator.deviceMemory || 0}g`,
+        `${navigator.maxTouchPoints || 0}t`
+      ];
+
+      const hash = await sha256(parts.join("__"));
+      return "fp_" + hash.slice(0, 28);
     }
 
     // ---------- Метадеректерді жинау ----------
@@ -1938,26 +2057,20 @@
       };
     }
 
-    // visitors/{voterId} — әр уникалды fingerprint үшін бір құжат
-    async function logVisit(meta) {
+    // visitors/{voterId} — әр уникалды fingerprint үшін бір рет қана жазамыз.
+    // Егер құжат бар болса — мүлдем жазбаймыз (БД жүктемесін азайту).
+    async function logVisitOnce() {
       if (!voterId) return;
       try {
         const ref = doc(db, "visitors", voterId);
         const snap = await getDoc(ref);
-        if (snap.exists()) {
-          await setDoc(ref, {
-            ...meta,
-            lastSeen: serverTimestamp(),
-            visitCount: increment(1)
-          }, { merge: true });
-        } else {
-          await setDoc(ref, {
-            ...meta,
-            firstSeen: serverTimestamp(),
-            lastSeen: serverTimestamp(),
-            visitCount: 1
-          });
-        }
+        if (snap.exists()) return; // деректер бар — өткізіп жібереміз
+        const meta = await collectMetadata();
+        await setDoc(ref, {
+          ...meta,
+          firstSeen: serverTimestamp(),
+          visitCount: 1
+        });
       } catch (err) {
         console.warn("[visit] жазу қатесі:", err.code || err.message);
       }
@@ -2065,12 +2178,16 @@
       animateNumber(document.getElementById("totalVotes"), total);
       animateNumber(document.getElementById("liveCount"), total);
 
+      // Дауыс беру аяқталған не пайдаланушы дауыс берген — рейтинг режимі
+      const closed = isVotingClosed();
+      const showResults = alreadyVoted || closed;
+
       // тізімді сұрыптау (дауыс беруден кейін рейтинг бойынша)
       const list = NURSES.map(n => ({ ...n, votes: voteCounts[n.id] || 0 }));
-      if (alreadyVoted) list.sort((a, b) => b.votes - a.votes);
+      if (showResults) list.sort((a, b) => b.votes - a.votes);
 
       // Тек өзгеріс болғанда қайта рендер ету (бар анимациялар сақталады)
-      const sig = JSON.stringify({ list: list.map(x => [x.id, x.votes]), voted: votedFor, already: alreadyVoted, photos: Object.keys(photoUrls).length });
+      const sig = JSON.stringify({ list: list.map(x => [x.id, x.votes]), voted: votedFor, already: alreadyVoted, closed, photos: Object.keys(photoUrls).length });
       if (sig === lastSignature) return;
       const isFirstRender = !lastSignature;
       lastSignature = sig;
@@ -2083,7 +2200,7 @@
         else card.style.setProperty("--delay", "0s");
 
         const pct = total > 0 ? Math.round((n.votes / total) * 100) : 0;
-        const rankBadge = alreadyVoted
+        const rankBadge = showResults
           ? `<div class="badge-rank ${idx === 0 ? 'gold' : idx === 1 ? 'silver' : idx === 2 ? 'bronze' : ''}">#${idx + 1}${idx === 0 ? ' 🏆' : ''}</div>`
           : "";
 
@@ -2094,7 +2211,7 @@
              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
            </div>`;
 
-        const action = alreadyVoted
+        const action = showResults
           ? `<div class="results-row">
              <div class="res-info">
                <span>${pct}%${votedFor === n.id ? ' <span class="your-pick">Сіздің таңдауыңыз</span>' : ''}</span>
@@ -2159,6 +2276,12 @@
 
     function openConfirm(id) {
       if (alreadyVoted) return;
+      if (isVotingClosed()) {
+        alert("Дауыс беру аяқталды.");
+        lastSignature = "";
+        render();
+        return;
+      }
       pendingId = id;
       const n = NURSES.find(x => x.id === id);
       const ph = photoUrls[id]
@@ -2173,6 +2296,13 @@
 
     document.getElementById("confirmBtn").addEventListener("click", async () => {
       if (!pendingId || alreadyVoted) return;
+      if (isVotingClosed()) {
+        closeConfirm();
+        alert("Дауыс беру аяқталды.");
+        lastSignature = "";
+        render();
+        return;
+      }
       if (!voterId) {
         // IP әлі алынбады — қазір жылдам алып көрейік
         voterId = await buildVoterId();
@@ -2195,11 +2325,11 @@
             throw new Error("UNKNOWN_NURSE");
           }
           tx.update(nurseRef, { votes: (nurseSnap.data().votes || 0) + 1 });
-          const meta = window.__visitorMeta || await collectMetadata();
+          // Метадеректер визит кезінде visitors/{voterId} құжатына жазылған.
+          // voters құжатына қайта жазбаймыз — БД жүктемесін азайту үшін.
           tx.set(voterRef, {
             nurseId: id,
-            votedAt: serverTimestamp(),
-            ...meta
+            votedAt: serverTimestamp()
           });
         });
 
@@ -2257,6 +2387,45 @@
       }
     }
 
+    // ---------- Таймер ----------
+    const dlCard = document.getElementById("deadlineCard");
+    const dlLabel = document.getElementById("dlLabelText");
+    const dlTime = document.getElementById("dlTime");
+    const dlD = document.getElementById("dlDays");
+    const dlH = document.getElementById("dlHours");
+    const dlM = document.getElementById("dlMinutes");
+    const dlS = document.getElementById("dlSeconds");
+    const pad2 = (n) => String(n).padStart(2, "0");
+    let _wasClosed = null;
+    function tickCountdown() {
+      const now = Date.now();
+      const diff = VOTE_DEADLINE - now;
+      const closed = diff <= 0;
+      if (closed) {
+        dlCard.classList.add("closed");
+        dlLabel.textContent = "Дауыс беру аяқталды";
+        dlTime.innerHTML = '<div class="dl-closed-msg">Қорытынды нәтижелер төменде</div>';
+      } else {
+        const s = Math.floor(diff / 1000);
+        const days = Math.floor(s / 86400);
+        const hours = Math.floor((s % 86400) / 3600);
+        const minutes = Math.floor((s % 3600) / 60);
+        const seconds = s % 60;
+        dlD.textContent = days;
+        dlH.textContent = pad2(hours);
+        dlM.textContent = pad2(minutes);
+        dlS.textContent = pad2(seconds);
+      }
+      // Дауыс беру жабылғанда — рейтинг режиміне көшу
+      if (_wasClosed !== null && _wasClosed !== closed) {
+        lastSignature = "";
+        render();
+      }
+      _wasClosed = closed;
+    }
+    tickCountdown();
+    setInterval(tickCountdown, 1000);
+
     // ---------- Іске қосу ----------
     (async function init() {
       // 1) Карточкаларды лезде көрсету — фото URL-дері дайын, желі күтілмейді
@@ -2275,11 +2444,10 @@
       lastSignature = "";
       render();
 
-      // Метадеректерді жинап, visitors коллекциясына жазу — фон режимінде
+      // visitors/{voterId} құжаты болмаса ғана метадеректерді жинап жазамыз.
+      // Бар болса — толық өткізіп жібереміз (БД-ға қайта жазу жоқ).
       try {
-        const meta = await collectMetadata();
-        window.__visitorMeta = meta; // дауыс беру кезінде қайта пайдалану үшін
-        await logVisit(meta);
+        await logVisitOnce();
       } catch (err) {
         console.warn("[meta] қате:", err.message);
       }
