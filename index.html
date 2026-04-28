@@ -1,1088 +1,2113 @@
 <!DOCTYPE html>
 <html lang="kk">
+
 <head>
-<meta charset="UTF-8" />
-<meta name="viewport" content="width=device-width, initial-scale=1.0" />
-<title>Үздік мейіргерлер</title>
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link rel="preconnect" href="https://firebasestorage.googleapis.com" crossorigin>
-<link rel="preconnect" href="https://www.gstatic.com" crossorigin>
-<link rel="preconnect" href="https://firestore.googleapis.com" crossorigin>
-<link rel="dns-prefetch" href="https://api.ipify.org">
-<link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
-<style>
-  *{box-sizing:border-box;margin:0;padding:0}
-  :root{
-    --primary:#0ea5e9;
-    --primary-dark:#0284c7;
-    --primary-light:#e0f2fe;
-    --accent:#10b981;
-    --accent-dark:#059669;
-    --bg:#f0f9ff;
-    --surface:#ffffff;
-    --text:#0f172a;
-    --text-soft:#475569;
-    --text-mute:#94a3b8;
-    --border:#e2e8f0;
-    --shadow:0 4px 24px -8px rgba(14,165,233,.18);
-    --shadow-lg:0 20px 60px -20px rgba(14,165,233,.35);
-    --gold:#f59e0b;
-    --silver:#94a3b8;
-    --bronze:#b45309;
-    --ease-out: cubic-bezier(.2,.7,.2,1);
-    --ease-spring: cubic-bezier(.34,1.56,.64,1);
-  }
-  html,body{font-family:'Montserrat',system-ui,sans-serif;color:var(--text);background:var(--bg);line-height:1.55;-webkit-font-smoothing:antialiased;overflow-x:hidden}
-  body{
-    min-height:100vh;
-    background:
-      radial-gradient(1200px 600px at 10% -10%,#bae6fd 0%,transparent 60%),
-      radial-gradient(900px 500px at 110% 20%,#a7f3d0 0%,transparent 55%),
-      linear-gradient(180deg,#f0f9ff 0%,#ecfeff 100%);
-    background-attachment:fixed;
-    position:relative;
-  }
-
-  /* Анимациялық фон шарлары */
-  .bg-blobs{position:fixed;inset:0;z-index:0;pointer-events:none;overflow:hidden;contain:strict}
-  .blob{
-    position:absolute;border-radius:50%;filter:blur(60px);opacity:.45;
-    animation:float 18s ease-in-out infinite;
-    will-change:transform;
-  }
-  .blob.b1{width:380px;height:380px;background:#7dd3fc;top:-80px;left:-80px;animation-delay:0s}
-  .blob.b2{width:320px;height:320px;background:#6ee7b7;top:30%;right:-100px;animation-delay:-6s}
-  .blob.b3{width:280px;height:280px;background:#a5b4fc;bottom:-60px;left:30%;animation-delay:-12s}
-  @keyframes float{
-    0%,100%{transform:translate(0,0) scale(1)}
-    33%{transform:translate(40px,-30px) scale(1.08)}
-    66%{transform:translate(-30px,40px) scale(.95)}
-  }
-
-  .topbar,.hero,.question-card,main,.thank-banner,footer{position:relative;z-index:1}
-  .topbar{
-    position:sticky;top:0;z-index:50;
-    backdrop-filter:saturate(180%) blur(18px);
-    -webkit-backdrop-filter:saturate(180%) blur(18px);
-    background:rgba(255,255,255,.72);
-    border-bottom:1px solid rgba(226,232,240,.6);
-    transition:box-shadow .3s ease;
-  }
-  .topbar.scrolled{box-shadow:0 6px 20px -10px rgba(14,165,233,.25)}
-  .topbar-inner{max-width:1200px;margin:0 auto;padding:14px 24px;display:flex;align-items:center;justify-content:space-between;gap:16px}
-  .brand{display:flex;align-items:center;gap:12px;font-weight:800;letter-spacing:-.01em}
-  .brand-logo{
-    width:42px;height:42px;border-radius:12px;
-    background:linear-gradient(135deg,var(--primary) 0%,var(--accent) 100%);
-    display:grid;place-items:center;color:#fff;
-    box-shadow:var(--shadow);
-    animation:heartbeat 3.6s ease-in-out infinite;
-    will-change:transform;
-  }
-  @keyframes heartbeat{
-    0%,28%,100%{transform:scale(1)}
-    8%{transform:scale(1.14)}
-    16%{transform:scale(1)}
-    20%{transform:scale(1.08)}
-  }
-  .brand-logo svg{width:22px;height:22px}
-  .brand-text{display:flex;flex-direction:column;line-height:1.1}
-  .brand-text small{font-weight:500;color:var(--text-soft);font-size:11px;margin-top:2px}
-  .top-actions{display:flex;align-items:center;gap:10px}
-  .chip{
-    display:inline-flex;align-items:center;gap:8px;padding:8px 14px;border-radius:999px;
-    background:var(--primary-light);color:var(--primary-dark);font-weight:700;font-size:13px;
-    transition:transform .2s ease,box-shadow .25s ease;
-  }
-  .chip:hover{transform:translateY(-1px);box-shadow:0 6px 16px -4px rgba(14,165,233,.4)}
-  .chip .dot{
-    width:8px;height:8px;border-radius:999px;background:var(--accent);
-    box-shadow:0 0 0 4px rgba(16,185,129,.18);
-    animation:livePulse 1.6s ease-in-out infinite;
-  }
-  @keyframes livePulse{
-    0%,100%{box-shadow:0 0 0 4px rgba(16,185,129,.18)}
-    50%{box-shadow:0 0 0 7px rgba(16,185,129,.05)}
-  }
-
-  .hero{max-width:1200px;margin:0 auto;padding:48px 24px 16px;text-align:center}
-  .eyebrow{
-    display:inline-flex;align-items:center;gap:8px;
-    padding:6px 14px;border-radius:999px;
-    background:#fff;border:1px solid var(--border);color:var(--text-soft);
-    font-size:12px;font-weight:600;letter-spacing:.06em;text-transform:uppercase;
-    box-shadow:var(--shadow);
-  }
-  .eyebrow .pulse{width:6px;height:6px;border-radius:999px;background:#ef4444;animation:pulse 1.6s ease-in-out infinite}
-  @keyframes pulse{0%,100%{opacity:1;transform:scale(1)}50%{opacity:.4;transform:scale(1.4)}}
-  h1.title{
-    margin:18px auto 10px;max-width:900px;
-    font-size:clamp(28px,4.6vw,52px);font-weight:800;letter-spacing:-.02em;line-height:1.1;
-    background:linear-gradient(135deg,#0c4a6e 0%,#0ea5e9 50%,#10b981 100%);
-    background-size:200% 200%;
-    -webkit-background-clip:text;background-clip:text;color:transparent;
-    animation:gradMove 8s ease-in-out infinite, fadeUp .9s var(--ease-out) both;
-  }
-  @keyframes gradMove{0%,100%{background-position:0% 50%}50%{background-position:100% 50%}}
-  @keyframes fadeUp{from{opacity:0;transform:translateY(16px)}to{opacity:1;transform:none}}
-  .subtitle{max-width:680px;margin:0 auto;color:var(--text-soft);font-size:clamp(15px,1.4vw,18px);animation:fadeUp 1s .15s var(--ease-out) both}
-  .eyebrow{animation:fadeUp .8s var(--ease-out) both}
-
-  .question-card{
-    max-width:1200px;margin:36px auto 8px;padding:20px 24px;
-    background:linear-gradient(135deg,#0c4a6e 0%,#0369a1 100%);
-    color:#fff;border-radius:24px;
-    display:flex;align-items:center;justify-content:space-between;gap:16px;flex-wrap:wrap;
-    box-shadow:var(--shadow-lg);
-    position:relative;overflow:hidden;
-    animation:fadeUp .9s .25s var(--ease-out) both;
-  }
-  .question-card::before{
-    content:"";position:absolute;inset:auto -40px -60px auto;width:240px;height:240px;border-radius:50%;
-    background:radial-gradient(circle,rgba(16,185,129,.5) 0%,transparent 70%);
-    animation:float 14s ease-in-out infinite;
-  }
-  .question-card::after{
-    content:"";position:absolute;top:-100px;left:-80px;width:240px;height:240px;border-radius:50%;
-    background:radial-gradient(circle,rgba(125,211,252,.45) 0%,transparent 70%);
-    animation:float 18s ease-in-out infinite reverse;
-  }
-  .question-card .q{
-    display:flex;align-items:center;gap:14px;font-weight:700;font-size:clamp(18px,2vw,24px);position:relative;
-  }
-  .q-ic{
-    width:46px;height:46px;border-radius:14px;background:rgba(255,255,255,.14);display:grid;place-items:center;flex-shrink:0;
-  }
-  .q-ic svg{width:24px;height:24px}
-  .q-meta{position:relative;display:flex;gap:18px;color:rgba(255,255,255,.85);font-size:13px;font-weight:500}
-  .q-meta b{color:#fff;font-weight:700}
-
-  main{max-width:1200px;margin:0 auto;padding:24px}
-
-  .grid{
-    display:grid;gap:22px;
-    grid-template-columns:repeat(auto-fill,minmax(280px,1fr));
-  }
-
-  .card{
-    background:var(--surface);border-radius:22px;overflow:hidden;
-    border:1px solid var(--border);
-    box-shadow:var(--shadow);
-    transition:transform .35s var(--ease-out),box-shadow .35s var(--ease-out),border-color .25s ease;
-    display:flex;flex-direction:column;position:relative;
-    opacity:0;transform:translateY(28px);
-    animation:cardIn .7s var(--ease-out) forwards;
-    animation-delay:var(--delay,0s);
-    content-visibility:auto;
-    contain-intrinsic-size:auto 420px;
-  }
-  @keyframes cardIn{to{opacity:1;transform:none}}
-  .card:hover{transform:translateY(-8px);box-shadow:var(--shadow-lg);border-color:#bae6fd}
-  .card:hover .ph img{transform:scale(1.07)}
-  .card.selected{
-    border-color:var(--accent);
-    box-shadow:0 0 0 4px rgba(16,185,129,.22),var(--shadow-lg);
-    animation:cardIn .7s var(--ease-out) forwards, selectedPulse 2.4s ease-in-out 1s infinite;
-  }
-  @keyframes selectedPulse{
-    0%,100%{box-shadow:0 0 0 4px rgba(16,185,129,.22),var(--shadow-lg)}
-    50%{box-shadow:0 0 0 7px rgba(16,185,129,.32),var(--shadow-lg)}
-  }
-  .card .ph{
-    aspect-ratio:1/1;background:linear-gradient(135deg,#e0f2fe,#a7f3d0);position:relative;overflow:hidden;
-  }
-  .card .ph img{width:100%;height:100%;object-fit:cover;display:block;transition:transform .6s var(--ease-out)}
-  .card .ph::after{
-    content:"";position:absolute;inset:0;
-    background:linear-gradient(180deg,transparent 50%,rgba(0,0,0,.15) 100%);
-    opacity:0;transition:opacity .3s ease;pointer-events:none;
-  }
-  .card:hover .ph::after{opacity:1}
-  .card .ph .placeholder{
-    position:absolute;inset:0;display:grid;place-items:center;color:#0ea5e9;
-  }
-  .card .ph .placeholder svg{width:60%;height:60%;opacity:.35}
-  .badge-rank{
-    position:absolute;top:12px;left:12px;padding:6px 12px;border-radius:999px;
-    background:rgba(255,255,255,.92);backdrop-filter:blur(6px);
-    font-size:12px;font-weight:700;color:var(--text);
-    box-shadow:0 4px 14px rgba(0,0,0,.12);
-    display:flex;align-items:center;gap:6px;
-    animation:badgeIn .5s var(--ease-spring) both;
-  }
-  @keyframes badgeIn{from{opacity:0;transform:scale(.5) rotate(-12deg)}to{opacity:1;transform:none}}
-  .badge-rank.gold{
-    background:linear-gradient(135deg,#fde68a,#f59e0b);color:#78350f;
-    box-shadow:0 6px 22px rgba(245,158,11,.45);
-    animation:badgeIn .5s var(--ease-spring) both, goldShine 3s ease-in-out infinite;
-  }
-  @keyframes goldShine{
-    0%,100%{box-shadow:0 6px 22px rgba(245,158,11,.45)}
-    50%{box-shadow:0 6px 30px rgba(245,158,11,.7)}
-  }
-  .badge-rank.silver{background:linear-gradient(135deg,#e5e7eb,#94a3b8);color:#1f2937}
-  .badge-rank.bronze{background:linear-gradient(135deg,#fed7aa,#b45309);color:#fff}
-
-  .info{padding:18px 18px 20px;display:flex;flex-direction:column;gap:10px;flex:1}
-  .name{font-size:18px;font-weight:800;letter-spacing:-.01em;line-height:1.25}
-  .dob{color:var(--text-mute);font-size:13px;font-weight:500;display:flex;align-items:center;gap:6px}
-  .dob svg{width:14px;height:14px}
-  .meta-list{display:flex;flex-direction:column;gap:6px;margin-top:4px}
-  .meta-row{display:flex;gap:8px;font-size:13.5px;color:var(--text-soft)}
-  .meta-row .k{color:var(--text-mute);min-width:auto;font-weight:500}
-  .meta-row .v{color:var(--text);font-weight:600}
-  .tag{
-    display:inline-flex;align-items:center;gap:6px;padding:5px 10px;border-radius:8px;
-    background:var(--primary-light);color:var(--primary-dark);font-size:12px;font-weight:700;
-    width:fit-content;
-  }
-
-  .vote-btn{
-    margin-top:auto;width:100%;padding:13px 16px;border:none;border-radius:14px;cursor:pointer;
-    background:linear-gradient(135deg,var(--primary) 0%,var(--accent) 100%);
-    background-size:200% 100%;
-    color:#fff;font-weight:700;font-size:15px;letter-spacing:.01em;
-    display:flex;align-items:center;justify-content:center;gap:8px;
-    transition:transform .2s var(--ease-spring),box-shadow .25s ease,background-position .4s ease,opacity .2s ease;
-    box-shadow:0 8px 24px -8px rgba(14,165,233,.6);
-    position:relative;overflow:hidden;
-  }
-  .vote-btn::before{
-    content:"";position:absolute;top:0;left:-100%;width:60%;height:100%;
-    background:linear-gradient(90deg,transparent,rgba(255,255,255,.4),transparent);
-    transform:skewX(-20deg);transition:left .6s ease;
-  }
-  .vote-btn:hover{transform:translateY(-3px);box-shadow:0 16px 34px -8px rgba(14,165,233,.75);background-position:100% 0}
-  .vote-btn:hover::before{left:120%}
-  .vote-btn:active{transform:translateY(-1px) scale(.98)}
-  .vote-btn:disabled{opacity:.7;cursor:not-allowed;transform:none;box-shadow:none}
-  .vote-btn svg{width:18px;height:18px;transition:transform .2s ease}
-  .vote-btn:hover svg{transform:scale(1.15) rotate(-6deg)}
-
-  /* Rating mode */
-  .results-row{margin-top:auto;display:flex;flex-direction:column;gap:8px}
-  .bar-wrap{
-    width:100%;height:12px;background:#f1f5f9;border-radius:999px;overflow:hidden;
-    box-shadow:inset 0 1px 3px rgba(0,0,0,.06);
-  }
-  .bar{
-    height:100%;background:linear-gradient(90deg,var(--primary) 0%,var(--accent) 100%);
-    border-radius:999px;width:0;transition:width 1.1s var(--ease-out);
-    position:relative;overflow:hidden;
-  }
-  .bar::after{
-    content:"";position:absolute;inset:0;
-    background:linear-gradient(90deg,transparent,rgba(255,255,255,.5),transparent);
-    transform:translateX(-100%);
-    animation:shine 2.6s ease-in-out infinite;
-  }
-  @keyframes shine{0%{transform:translateX(-100%)}60%,100%{transform:translateX(200%)}}
-  .res-info{display:flex;justify-content:space-between;align-items:center;font-size:13px;color:var(--text-soft);font-weight:600;gap:8px}
-  .res-info b{color:var(--text);font-weight:800;font-size:15px}
-  .your-pick{
-    display:inline-flex;align-items:center;gap:6px;padding:4px 10px;border-radius:999px;
-    background:linear-gradient(135deg,#dcfce7,#bbf7d0);color:#166534;font-size:11px;font-weight:800;
-    box-shadow:0 2px 8px rgba(16,185,129,.25);
-    animation:tada .8s var(--ease-spring) .2s both;
-  }
-  @keyframes tada{
-    0%{transform:scale(.4) rotate(-12deg);opacity:0}
-    60%{transform:scale(1.1) rotate(4deg);opacity:1}
-    100%{transform:scale(1);opacity:1}
-  }
-
-  /* Toast / banner after vote */
-  .thank-banner{
-    max-width:1200px;margin:24px auto 0;padding:18px 22px;border-radius:20px;
-    background:linear-gradient(135deg,#10b981 0%,#0ea5e9 100%);
-    background-size:200% 200%;
-    color:#fff;
-    display:flex;align-items:center;justify-content:space-between;gap:16px;flex-wrap:wrap;
-    box-shadow:0 20px 50px -10px rgba(16,185,129,.5);
-    animation:slideIn .7s var(--ease-spring), gradMove 8s ease-in-out infinite;
-    position:relative;overflow:hidden;
-  }
-  .thank-banner::after{
-    content:"";position:absolute;inset:0;
-    background:linear-gradient(120deg,transparent 30%,rgba(255,255,255,.2) 50%,transparent 70%);
-    transform:translateX(-100%);
-    animation:shine 3.5s ease-in-out infinite;
-  }
-  @keyframes slideIn{from{opacity:0;transform:translateY(-20px) scale(.96)}to{opacity:1;transform:none}}
-  .thank-banner .left{display:flex;align-items:center;gap:14px;position:relative;z-index:1}
-  .thank-icon{
-    width:48px;height:48px;border-radius:14px;background:rgba(255,255,255,.22);display:grid;place-items:center;flex-shrink:0;
-    animation:checkPop .8s var(--ease-spring) .15s both;
-  }
-  @keyframes checkPop{
-    0%{transform:scale(0) rotate(-180deg);opacity:0}
-    60%{transform:scale(1.2) rotate(8deg);opacity:1}
-    100%{transform:scale(1) rotate(0)}
-  }
-  .thank-icon svg{width:26px;height:26px;stroke-dasharray:24;stroke-dashoffset:24;animation:drawCheck .6s ease-out .6s both}
-  @keyframes drawCheck{to{stroke-dashoffset:0}}
-  .thank-banner h3{font-size:17px;font-weight:800;margin-bottom:2px}
-  .thank-banner p{font-size:13.5px;opacity:.95}
-
-  /* Confirm modal */
-  .modal-bg{position:fixed;inset:0;background:rgba(15,23,42,.55);backdrop-filter:blur(6px);display:none;align-items:center;justify-content:center;z-index:100;padding:20px;animation:fadeIn .2s ease}
-  .modal-bg.open{display:flex}
-  @keyframes fadeIn{from{opacity:0}to{opacity:1}}
-  .modal{
-    background:#fff;border-radius:22px;max-width:420px;width:100%;padding:26px;
-    box-shadow:0 30px 80px rgba(0,0,0,.3);
-    animation:popIn .45s var(--ease-spring);
-    position:relative;overflow:hidden;
-  }
-  .modal::before{
-    content:"";position:absolute;top:-2px;left:-2px;right:-2px;height:4px;
-    background:linear-gradient(90deg,var(--primary),var(--accent),var(--primary));
-    background-size:200% 100%;
-    animation:gradMove 3s linear infinite;
-  }
-  @keyframes popIn{from{opacity:0;transform:scale(.85) translateY(20px)}to{opacity:1;transform:scale(1)}}
-  .modal h3{font-size:20px;font-weight:800;margin-bottom:6px}
-  .modal p{color:var(--text-soft);font-size:14.5px;margin-bottom:18px}
-  .modal .pick{display:flex;align-items:center;gap:12px;padding:12px;border-radius:14px;background:var(--primary-light);margin-bottom:18px}
-  .modal .pick img,.modal .pick .ph2{width:48px;height:48px;border-radius:12px;object-fit:cover;flex-shrink:0;background:linear-gradient(135deg,#bae6fd,#a7f3d0)}
-  .modal .pick b{display:block;font-size:14px;font-weight:800}
-  .modal .pick small{color:var(--text-soft);font-size:12.5px}
-  .modal-btns{display:flex;gap:10px}
-  .btn{padding:12px 18px;border-radius:12px;border:none;cursor:pointer;font-weight:700;font-size:14px;transition:all .15s ease;flex:1}
-  .btn-primary{
-    background:linear-gradient(135deg,var(--primary),var(--accent));color:#fff;
-    background-size:200% 100%;position:relative;overflow:hidden;
-  }
-  .btn-primary::before{
-    content:"";position:absolute;top:0;left:-100%;width:60%;height:100%;
-    background:linear-gradient(90deg,transparent,rgba(255,255,255,.4),transparent);
-    transform:skewX(-20deg);transition:left .6s ease;
-  }
-  .btn-primary:hover{transform:translateY(-2px);box-shadow:0 10px 22px -4px rgba(14,165,233,.6);background-position:100% 0}
-  .btn-primary:hover::before{left:120%}
-  .btn-primary:active{transform:translateY(0) scale(.97)}
-  .btn-ghost{background:#f1f5f9;color:var(--text)}
-  .btn-ghost:hover{background:#e2e8f0;transform:translateY(-1px)}
-  .btn-ghost:active{transform:translateY(0)}
-
-  /* Loading skeleton */
-  .skeleton{
-    background:linear-gradient(90deg,#f1f5f9 0%,#e2e8f0 50%,#f1f5f9 100%);
-    background-size:200% 100%;
-    animation:shimmer 1.4s infinite linear;
-  }
-  @keyframes shimmer{from{background-position:200% 0}to{background-position:-200% 0}}
-
-  footer{max-width:1200px;margin:60px auto 30px;padding:0 24px;text-align:center;color:var(--text-mute);font-size:13px}
-  footer .heart{color:#ef4444}
-
-  /* ===== Tablet ===== */
-  @media (max-width:900px){
-    .hero{padding:32px 16px 8px}
-    main{padding:18px 14px}
-    .grid{gap:16px;grid-template-columns:repeat(auto-fill,minmax(240px,1fr))}
-    .question-card{margin:24px 14px 4px;padding:16px 18px;border-radius:18px}
-    .thank-banner{margin-left:14px;margin-right:14px}
-    footer{margin-top:40px;padding:0 16px}
-  }
-
-  /* ===== Mobile ===== */
-  @media (max-width:600px){
-    body{background-attachment:scroll}
-    .blob.b1{width:240px;height:240px}
-    .blob.b2{width:200px;height:200px}
-    .blob.b3{width:180px;height:180px}
-    .topbar-inner{padding:10px 14px;gap:10px}
-    .brand{gap:10px}
-    .brand-logo{width:36px;height:36px;border-radius:10px}
-    .brand-logo svg{width:18px;height:18px}
-    .brand-text{font-size:14px}
-    .brand-text small{font-size:10px}
-    .top-actions .chip{padding:6px 10px;font-size:11px}
-
-    .hero{padding:24px 16px 4px}
-    .eyebrow{font-size:10.5px;padding:5px 12px}
-    h1.title{font-size:26px;margin:14px auto 8px;line-height:1.15}
-    .subtitle{font-size:14px;line-height:1.45}
-
-    .question-card{
-      margin:18px 14px 4px;padding:14px 16px;border-radius:16px;
-      flex-direction:column;align-items:flex-start;gap:10px;
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Үздік мейіргерлер</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link rel="preconnect" href="https://firebasestorage.googleapis.com" crossorigin>
+  <link rel="preconnect" href="https://www.gstatic.com" crossorigin>
+  <link rel="preconnect" href="https://firestore.googleapis.com" crossorigin>
+  <link rel="dns-prefetch" href="https://api.ipify.org">
+  <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700;800;900&display=swap"
+    rel="stylesheet">
+  <style>
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0
     }
-    .question-card .q{font-size:16px;gap:10px}
-    .q-ic{width:38px;height:38px;border-radius:11px}
-    .q-ic svg{width:20px;height:20px}
-    .q-meta{font-size:12px;gap:14px;flex-wrap:wrap}
 
-    main{padding:16px 10px}
-    .grid{
-      gap:10px;
-      grid-template-columns:repeat(2,1fr);
+    :root {
+      --primary: #0ea5e9;
+      --primary-dark: #0284c7;
+      --primary-light: #e0f2fe;
+      --accent: #10b981;
+      --accent-dark: #059669;
+      --bg: #f0f9ff;
+      --surface: #ffffff;
+      --text: #0f172a;
+      --text-soft: #475569;
+      --text-mute: #94a3b8;
+      --border: #e2e8f0;
+      --shadow: 0 4px 24px -8px rgba(14, 165, 233, .18);
+      --shadow-lg: 0 20px 60px -20px rgba(14, 165, 233, .35);
+      --gold: #f59e0b;
+      --silver: #94a3b8;
+      --bronze: #b45309;
+      --ease-out: cubic-bezier(.2, .7, .2, 1);
+      --ease-spring: cubic-bezier(.34, 1.56, .64, 1);
     }
-    .card{border-radius:16px}
-    .card .ph{aspect-ratio:1/1}
-    .info{padding:10px 10px 12px;gap:6px}
-    .name{font-size:13px;line-height:1.25;font-weight:700}
-    .dob{font-size:11px;gap:4px}
-    .dob svg{width:12px;height:12px}
-    .meta-list{gap:3px;margin-top:2px}
-    .meta-row{font-size:11px;gap:4px}
-    .tag{font-size:10px;padding:3px 7px;gap:4px}
-    .vote-btn{padding:10px 8px;font-size:12.5px;border-radius:10px;gap:5px}
-    .vote-btn svg{width:14px;height:14px}
 
-    .badge-rank{padding:4px 8px;font-size:10px;top:8px;left:8px;gap:3px}
-
-    .results-row{gap:6px}
-    .res-info{font-size:11px}
-    .res-info b{font-size:13px}
-    .your-pick{font-size:9.5px;padding:3px 7px}
-    .bar-wrap{height:8px}
-
-    .thank-banner{
-      margin:16px 12px 0;padding:14px 16px;border-radius:16px;
-      flex-direction:column;align-items:flex-start;
+    html,
+    body {
+      font-family: 'Montserrat', system-ui, sans-serif;
+      color: var(--text);
+      background: var(--bg);
+      line-height: 1.55;
+      -webkit-font-smoothing: antialiased;
+      overflow-x: hidden
     }
-    .thank-banner .left{gap:12px;align-items:flex-start}
-    .thank-icon{width:40px;height:40px;border-radius:11px}
-    .thank-icon svg{width:22px;height:22px}
-    .thank-banner h3{font-size:15px;line-height:1.3}
-    .thank-banner p{font-size:12.5px;line-height:1.4}
 
-    .modal{padding:20px;border-radius:18px}
-    .modal h3{font-size:17px}
-    .modal p{font-size:13.5px}
-    .modal .pick b{font-size:13px}
-    .modal .pick small{font-size:11.5px}
-    .btn{padding:11px 14px;font-size:13.5px}
-
-    footer{font-size:12px;margin:40px auto 24px}
-  }
-
-  /* ===== Very small phones ===== */
-  @media (max-width:380px){
-    h1.title{font-size:22px}
-    .subtitle{font-size:13px}
-    .question-card .q{font-size:15px}
-    .top-actions .chip{display:none}
-    .modal-btns{flex-direction:column-reverse}
-    .grid{gap:8px}
-    main{padding:14px 8px}
-    .name{font-size:12px}
-    .meta-row{font-size:10.5px}
-    .vote-btn{padding:9px 6px;font-size:11.5px}
-    .badge-rank{font-size:9.5px;padding:3px 7px}
-  }
-
-  /* ===== Reduced motion ===== */
-  @media (prefers-reduced-motion: reduce){
-    *,*::before,*::after{
-      animation-duration:.01ms !important;
-      animation-iteration-count:1 !important;
-      transition-duration:.01ms !important;
+    body {
+      min-height: 100vh;
+      background:
+        radial-gradient(1200px 600px at 10% -10%, #bae6fd 0%, transparent 60%),
+        radial-gradient(900px 500px at 110% 20%, #a7f3d0 0%, transparent 55%),
+        linear-gradient(180deg, #f0f9ff 0%, #ecfeff 100%);
+      background-attachment: fixed;
+      position: relative;
     }
-    .blob{display:none}
-  }
-</style>
+
+    /* Анимациялық фон шарлары */
+    .bg-blobs {
+      position: fixed;
+      inset: 0;
+      z-index: 0;
+      pointer-events: none;
+      overflow: hidden;
+      contain: strict
+    }
+
+    .blob {
+      position: absolute;
+      border-radius: 50%;
+      filter: blur(60px);
+      opacity: .45;
+      animation: float 18s ease-in-out infinite;
+      will-change: transform;
+    }
+
+    .blob.b1 {
+      width: 380px;
+      height: 380px;
+      background: #7dd3fc;
+      top: -80px;
+      left: -80px;
+      animation-delay: 0s
+    }
+
+    .blob.b2 {
+      width: 320px;
+      height: 320px;
+      background: #6ee7b7;
+      top: 30%;
+      right: -100px;
+      animation-delay: -6s
+    }
+
+    .blob.b3 {
+      width: 280px;
+      height: 280px;
+      background: #a5b4fc;
+      bottom: -60px;
+      left: 30%;
+      animation-delay: -12s
+    }
+
+    @keyframes float {
+
+      0%,
+      100% {
+        transform: translate(0, 0) scale(1)
+      }
+
+      33% {
+        transform: translate(40px, -30px) scale(1.08)
+      }
+
+      66% {
+        transform: translate(-30px, 40px) scale(.95)
+      }
+    }
+
+    .topbar,
+    .hero,
+    .question-card,
+    main,
+    .thank-banner,
+    footer {
+      position: relative;
+      z-index: 1
+    }
+
+    .topbar {
+      position: sticky;
+      top: 0;
+      z-index: 50;
+      backdrop-filter: saturate(180%) blur(18px);
+      -webkit-backdrop-filter: saturate(180%) blur(18px);
+      background: rgba(255, 255, 255, .72);
+      border-bottom: 1px solid rgba(226, 232, 240, .6);
+      transition: box-shadow .3s ease;
+    }
+
+    .topbar.scrolled {
+      box-shadow: 0 6px 20px -10px rgba(14, 165, 233, .25)
+    }
+
+    .topbar-inner {
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 14px 24px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 16px
+    }
+
+    .brand {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      font-weight: 800;
+      letter-spacing: -.01em
+    }
+
+    .brand-logo {
+      width: 42px;
+      height: 42px;
+      border-radius: 12px;
+      background: linear-gradient(135deg, var(--primary) 0%, var(--accent) 100%);
+      display: grid;
+      place-items: center;
+      color: #fff;
+      box-shadow: var(--shadow);
+      animation: heartbeat 3.6s ease-in-out infinite;
+      will-change: transform;
+    }
+
+    @keyframes heartbeat {
+
+      0%,
+      28%,
+      100% {
+        transform: scale(1)
+      }
+
+      8% {
+        transform: scale(1.14)
+      }
+
+      16% {
+        transform: scale(1)
+      }
+
+      20% {
+        transform: scale(1.08)
+      }
+    }
+
+    .brand-logo svg {
+      width: 22px;
+      height: 22px
+    }
+
+    .brand-text {
+      display: flex;
+      flex-direction: column;
+      line-height: 1.1
+    }
+
+    .brand-text small {
+      font-weight: 500;
+      color: var(--text-soft);
+      font-size: 11px;
+      margin-top: 2px
+    }
+
+    .top-actions {
+      display: flex;
+      align-items: center;
+      gap: 10px
+    }
+
+    .chip {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 8px 14px;
+      border-radius: 999px;
+      background: var(--primary-light);
+      color: var(--primary-dark);
+      font-weight: 700;
+      font-size: 13px;
+      transition: transform .2s ease, box-shadow .25s ease;
+    }
+
+    .chip:hover {
+      transform: translateY(-1px);
+      box-shadow: 0 6px 16px -4px rgba(14, 165, 233, .4)
+    }
+
+    .chip .dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 999px;
+      background: var(--accent);
+      box-shadow: 0 0 0 4px rgba(16, 185, 129, .18);
+      animation: livePulse 1.6s ease-in-out infinite;
+    }
+
+    @keyframes livePulse {
+
+      0%,
+      100% {
+        box-shadow: 0 0 0 4px rgba(16, 185, 129, .18)
+      }
+
+      50% {
+        box-shadow: 0 0 0 7px rgba(16, 185, 129, .05)
+      }
+    }
+
+    .hero {
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 48px 24px 16px;
+      text-align: center
+    }
+
+    .eyebrow {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 6px 14px;
+      border-radius: 999px;
+      background: #fff;
+      border: 1px solid var(--border);
+      color: var(--text-soft);
+      font-size: 12px;
+      font-weight: 600;
+      letter-spacing: .06em;
+      text-transform: uppercase;
+      box-shadow: var(--shadow);
+    }
+
+    .eyebrow .pulse {
+      width: 6px;
+      height: 6px;
+      border-radius: 999px;
+      background: #ef4444;
+      animation: pulse 1.6s ease-in-out infinite
+    }
+
+    @keyframes pulse {
+
+      0%,
+      100% {
+        opacity: 1;
+        transform: scale(1)
+      }
+
+      50% {
+        opacity: .4;
+        transform: scale(1.4)
+      }
+    }
+
+    h1.title {
+      margin: 18px auto 10px;
+      max-width: 900px;
+      font-size: clamp(28px, 4.6vw, 52px);
+      font-weight: 800;
+      letter-spacing: -.02em;
+      line-height: 1.1;
+      background: linear-gradient(135deg, #0c4a6e 0%, #0ea5e9 50%, #10b981 100%);
+      background-size: 200% 200%;
+      -webkit-background-clip: text;
+      background-clip: text;
+      color: transparent;
+      animation: gradMove 8s ease-in-out infinite, fadeUp .9s var(--ease-out) both;
+    }
+
+    @keyframes gradMove {
+
+      0%,
+      100% {
+        background-position: 0% 50%
+      }
+
+      50% {
+        background-position: 100% 50%
+      }
+    }
+
+    @keyframes fadeUp {
+      from {
+        opacity: 0;
+        transform: translateY(16px)
+      }
+
+      to {
+        opacity: 1;
+        transform: none
+      }
+    }
+
+    .subtitle {
+      max-width: 680px;
+      margin: 0 auto;
+      color: var(--text-soft);
+      font-size: clamp(15px, 1.4vw, 18px);
+      animation: fadeUp 1s .15s var(--ease-out) both
+    }
+
+    .eyebrow {
+      animation: fadeUp .8s var(--ease-out) both
+    }
+
+    .question-card {
+      max-width: 1200px;
+      margin: 36px auto 8px;
+      padding: 20px 24px;
+      background: linear-gradient(135deg, #0c4a6e 0%, #0369a1 100%);
+      color: #fff;
+      border-radius: 24px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 16px;
+      flex-wrap: wrap;
+      box-shadow: var(--shadow-lg);
+      position: relative;
+      overflow: hidden;
+      animation: fadeUp .9s .25s var(--ease-out) both;
+    }
+
+    .question-card::before {
+      content: "";
+      position: absolute;
+      inset: auto -40px -60px auto;
+      width: 240px;
+      height: 240px;
+      border-radius: 50%;
+      background: radial-gradient(circle, rgba(16, 185, 129, .5) 0%, transparent 70%);
+      animation: float 14s ease-in-out infinite;
+    }
+
+    .question-card::after {
+      content: "";
+      position: absolute;
+      top: -100px;
+      left: -80px;
+      width: 240px;
+      height: 240px;
+      border-radius: 50%;
+      background: radial-gradient(circle, rgba(125, 211, 252, .45) 0%, transparent 70%);
+      animation: float 18s ease-in-out infinite reverse;
+    }
+
+    .question-card .q {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+      font-weight: 700;
+      font-size: clamp(18px, 2vw, 24px);
+      position: relative;
+    }
+
+    .q-ic {
+      width: 46px;
+      height: 46px;
+      border-radius: 14px;
+      background: rgba(255, 255, 255, .14);
+      display: grid;
+      place-items: center;
+      flex-shrink: 0;
+    }
+
+    .q-ic svg {
+      width: 24px;
+      height: 24px
+    }
+
+    .q-meta {
+      position: relative;
+      display: flex;
+      gap: 18px;
+      color: rgba(255, 255, 255, .85);
+      font-size: 13px;
+      font-weight: 500
+    }
+
+    .q-meta b {
+      color: #fff;
+      font-weight: 700
+    }
+
+    main {
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 24px
+    }
+
+    .grid {
+      display: grid;
+      gap: 22px;
+      grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+    }
+
+    .card {
+      background: var(--surface);
+      border-radius: 22px;
+      overflow: hidden;
+      border: 1px solid var(--border);
+      box-shadow: var(--shadow);
+      transition: transform .35s var(--ease-out), box-shadow .35s var(--ease-out), border-color .25s ease;
+      display: flex;
+      flex-direction: column;
+      position: relative;
+      opacity: 0;
+      transform: translateY(28px);
+      animation: cardIn .7s var(--ease-out) forwards;
+      animation-delay: var(--delay, 0s);
+      content-visibility: auto;
+      contain-intrinsic-size: auto 420px;
+    }
+
+    @keyframes cardIn {
+      to {
+        opacity: 1;
+        transform: none
+      }
+    }
+
+    .card:hover {
+      transform: translateY(-8px);
+      box-shadow: var(--shadow-lg);
+      border-color: #bae6fd
+    }
+
+    .card:hover .ph img {
+      transform: scale(1.07)
+    }
+
+    .card.selected {
+      border-color: var(--accent);
+      box-shadow: 0 0 0 4px rgba(16, 185, 129, .22), var(--shadow-lg);
+      animation: cardIn .7s var(--ease-out) forwards, selectedPulse 2.4s ease-in-out 1s infinite;
+    }
+
+    @keyframes selectedPulse {
+
+      0%,
+      100% {
+        box-shadow: 0 0 0 4px rgba(16, 185, 129, .22), var(--shadow-lg)
+      }
+
+      50% {
+        box-shadow: 0 0 0 7px rgba(16, 185, 129, .32), var(--shadow-lg)
+      }
+    }
+
+    .card .ph {
+      aspect-ratio: 1/1;
+      background: linear-gradient(135deg, #e0f2fe, #a7f3d0);
+      position: relative;
+      overflow: hidden;
+    }
+
+    .card .ph img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      display: block;
+      transition: transform .6s var(--ease-out)
+    }
+
+    .card .ph::after {
+      content: "";
+      position: absolute;
+      inset: 0;
+      background: linear-gradient(180deg, transparent 50%, rgba(0, 0, 0, .15) 100%);
+      opacity: 0;
+      transition: opacity .3s ease;
+      pointer-events: none;
+    }
+
+    .card:hover .ph::after {
+      opacity: 1
+    }
+
+    .card .ph .placeholder {
+      position: absolute;
+      inset: 0;
+      display: grid;
+      place-items: center;
+      color: #0ea5e9;
+    }
+
+    .card .ph .placeholder svg {
+      width: 60%;
+      height: 60%;
+      opacity: .35
+    }
+
+    .badge-rank {
+      position: absolute;
+      top: 12px;
+      left: 12px;
+      padding: 6px 12px;
+      border-radius: 999px;
+      background: rgba(255, 255, 255, .92);
+      backdrop-filter: blur(6px);
+      font-size: 12px;
+      font-weight: 700;
+      color: var(--text);
+      box-shadow: 0 4px 14px rgba(0, 0, 0, .12);
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      animation: badgeIn .5s var(--ease-spring) both;
+    }
+
+    @keyframes badgeIn {
+      from {
+        opacity: 0;
+        transform: scale(.5) rotate(-12deg)
+      }
+
+      to {
+        opacity: 1;
+        transform: none
+      }
+    }
+
+    .badge-rank.gold {
+      background: linear-gradient(135deg, #fde68a, #f59e0b);
+      color: #78350f;
+      box-shadow: 0 6px 22px rgba(245, 158, 11, .45);
+      animation: badgeIn .5s var(--ease-spring) both, goldShine 3s ease-in-out infinite;
+    }
+
+    @keyframes goldShine {
+
+      0%,
+      100% {
+        box-shadow: 0 6px 22px rgba(245, 158, 11, .45)
+      }
+
+      50% {
+        box-shadow: 0 6px 30px rgba(245, 158, 11, .7)
+      }
+    }
+
+    .badge-rank.silver {
+      background: linear-gradient(135deg, #e5e7eb, #94a3b8);
+      color: #1f2937
+    }
+
+    .badge-rank.bronze {
+      background: linear-gradient(135deg, #fed7aa, #b45309);
+      color: #fff
+    }
+
+    .info {
+      padding: 18px 18px 20px;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      flex: 1
+    }
+
+    .name {
+      font-size: 18px;
+      font-weight: 800;
+      letter-spacing: -.01em;
+      line-height: 1.25
+    }
+
+    .dob {
+      color: var(--text-mute);
+      font-size: 13px;
+      font-weight: 500;
+      display: flex;
+      align-items: center;
+      gap: 6px
+    }
+
+    .dob svg {
+      width: 14px;
+      height: 14px
+    }
+
+    .meta-list {
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+      margin-top: 4px
+    }
+
+    .meta-row {
+      display: flex;
+      gap: 8px;
+      font-size: 13.5px;
+      color: var(--text-soft)
+    }
+
+    .meta-row .k {
+      color: var(--text-mute);
+      min-width: auto;
+      font-weight: 500
+    }
+
+    .meta-row .v {
+      color: var(--text);
+      font-weight: 600
+    }
+
+    .tag {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 5px 10px;
+      border-radius: 8px;
+      background: var(--primary-light);
+      color: var(--primary-dark);
+      font-size: 12px;
+      font-weight: 700;
+      width: fit-content;
+    }
+
+    .vote-btn {
+      margin-top: auto;
+      width: 100%;
+      padding: 13px 16px;
+      border: none;
+      border-radius: 14px;
+      cursor: pointer;
+      background: linear-gradient(135deg, var(--primary) 0%, var(--accent) 100%);
+      background-size: 200% 100%;
+      color: #fff;
+      font-weight: 700;
+      font-size: 15px;
+      letter-spacing: .01em;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      transition: transform .2s var(--ease-spring), box-shadow .25s ease, background-position .4s ease, opacity .2s ease;
+      box-shadow: 0 8px 24px -8px rgba(14, 165, 233, .6);
+      position: relative;
+      overflow: hidden;
+    }
+
+    .vote-btn::before {
+      content: "";
+      position: absolute;
+      top: 0;
+      left: -100%;
+      width: 60%;
+      height: 100%;
+      background: linear-gradient(90deg, transparent, rgba(255, 255, 255, .4), transparent);
+      transform: skewX(-20deg);
+      transition: left .6s ease;
+    }
+
+    .vote-btn:hover {
+      transform: translateY(-3px);
+      box-shadow: 0 16px 34px -8px rgba(14, 165, 233, .75);
+      background-position: 100% 0
+    }
+
+    .vote-btn:hover::before {
+      left: 120%
+    }
+
+    .vote-btn:active {
+      transform: translateY(-1px) scale(.98)
+    }
+
+    .vote-btn:disabled {
+      opacity: .7;
+      cursor: not-allowed;
+      transform: none;
+      box-shadow: none
+    }
+
+    .vote-btn svg {
+      width: 18px;
+      height: 18px;
+      transition: transform .2s ease
+    }
+
+    .vote-btn:hover svg {
+      transform: scale(1.15) rotate(-6deg)
+    }
+
+    /* Rating mode */
+    .results-row {
+      margin-top: auto;
+      display: flex;
+      flex-direction: column;
+      gap: 8px
+    }
+
+    .bar-wrap {
+      width: 100%;
+      height: 12px;
+      background: #f1f5f9;
+      border-radius: 999px;
+      overflow: hidden;
+      box-shadow: inset 0 1px 3px rgba(0, 0, 0, .06);
+    }
+
+    .bar {
+      height: 100%;
+      background: linear-gradient(90deg, var(--primary) 0%, var(--accent) 100%);
+      border-radius: 999px;
+      width: 0;
+      transition: width 1.1s var(--ease-out);
+      position: relative;
+      overflow: hidden;
+    }
+
+    .bar::after {
+      content: "";
+      position: absolute;
+      inset: 0;
+      background: linear-gradient(90deg, transparent, rgba(255, 255, 255, .5), transparent);
+      transform: translateX(-100%);
+      animation: shine 2.6s ease-in-out infinite;
+    }
+
+    @keyframes shine {
+      0% {
+        transform: translateX(-100%)
+      }
+
+      60%,
+      100% {
+        transform: translateX(200%)
+      }
+    }
+
+    .res-info {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      font-size: 13px;
+      color: var(--text-soft);
+      font-weight: 600;
+      gap: 8px
+    }
+
+    .res-info b {
+      color: var(--text);
+      font-weight: 800;
+      font-size: 15px
+    }
+
+    .your-pick {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 4px 10px;
+      border-radius: 999px;
+      background: linear-gradient(135deg, #dcfce7, #bbf7d0);
+      color: #166534;
+      font-size: 11px;
+      font-weight: 800;
+      box-shadow: 0 2px 8px rgba(16, 185, 129, .25);
+      animation: tada .8s var(--ease-spring) .2s both;
+    }
+
+    @keyframes tada {
+      0% {
+        transform: scale(.4) rotate(-12deg);
+        opacity: 0
+      }
+
+      60% {
+        transform: scale(1.1) rotate(4deg);
+        opacity: 1
+      }
+
+      100% {
+        transform: scale(1);
+        opacity: 1
+      }
+    }
+
+    /* Toast / banner after vote */
+    .thank-banner {
+      max-width: 1200px;
+      margin: 24px auto 0;
+      padding: 18px 22px;
+      border-radius: 20px;
+      background: linear-gradient(135deg, #10b981 0%, #0ea5e9 100%);
+      background-size: 200% 200%;
+      color: #fff;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 16px;
+      flex-wrap: wrap;
+      box-shadow: 0 20px 50px -10px rgba(16, 185, 129, .5);
+      animation: slideIn .7s var(--ease-spring), gradMove 8s ease-in-out infinite;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .thank-banner::after {
+      content: "";
+      position: absolute;
+      inset: 0;
+      background: linear-gradient(120deg, transparent 30%, rgba(255, 255, 255, .2) 50%, transparent 70%);
+      transform: translateX(-100%);
+      animation: shine 3.5s ease-in-out infinite;
+    }
+
+    @keyframes slideIn {
+      from {
+        opacity: 0;
+        transform: translateY(-20px) scale(.96)
+      }
+
+      to {
+        opacity: 1;
+        transform: none
+      }
+    }
+
+    .thank-banner .left {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+      position: relative;
+      z-index: 1
+    }
+
+    .thank-icon {
+      width: 48px;
+      height: 48px;
+      border-radius: 14px;
+      background: rgba(255, 255, 255, .22);
+      display: grid;
+      place-items: center;
+      flex-shrink: 0;
+      animation: checkPop .8s var(--ease-spring) .15s both;
+    }
+
+    @keyframes checkPop {
+      0% {
+        transform: scale(0) rotate(-180deg);
+        opacity: 0
+      }
+
+      60% {
+        transform: scale(1.2) rotate(8deg);
+        opacity: 1
+      }
+
+      100% {
+        transform: scale(1) rotate(0)
+      }
+    }
+
+    .thank-icon svg {
+      width: 26px;
+      height: 26px;
+      stroke-dasharray: 24;
+      stroke-dashoffset: 24;
+      animation: drawCheck .6s ease-out .6s both
+    }
+
+    @keyframes drawCheck {
+      to {
+        stroke-dashoffset: 0
+      }
+    }
+
+    .thank-banner h3 {
+      font-size: 17px;
+      font-weight: 800;
+      margin-bottom: 2px
+    }
+
+    .thank-banner p {
+      font-size: 13.5px;
+      opacity: .95
+    }
+
+    /* Confirm modal */
+    .modal-bg {
+      position: fixed;
+      inset: 0;
+      background: rgba(15, 23, 42, .55);
+      backdrop-filter: blur(6px);
+      display: none;
+      align-items: center;
+      justify-content: center;
+      z-index: 100;
+      padding: 20px;
+      animation: fadeIn .2s ease
+    }
+
+    .modal-bg.open {
+      display: flex
+    }
+
+    @keyframes fadeIn {
+      from {
+        opacity: 0
+      }
+
+      to {
+        opacity: 1
+      }
+    }
+
+    .modal {
+      background: #fff;
+      border-radius: 22px;
+      max-width: 420px;
+      width: 100%;
+      padding: 26px;
+      box-shadow: 0 30px 80px rgba(0, 0, 0, .3);
+      animation: popIn .45s var(--ease-spring);
+      position: relative;
+      overflow: hidden;
+    }
+
+    .modal::before {
+      content: "";
+      position: absolute;
+      top: -2px;
+      left: -2px;
+      right: -2px;
+      height: 4px;
+      background: linear-gradient(90deg, var(--primary), var(--accent), var(--primary));
+      background-size: 200% 100%;
+      animation: gradMove 3s linear infinite;
+    }
+
+    @keyframes popIn {
+      from {
+        opacity: 0;
+        transform: scale(.85) translateY(20px)
+      }
+
+      to {
+        opacity: 1;
+        transform: scale(1)
+      }
+    }
+
+    .modal h3 {
+      font-size: 20px;
+      font-weight: 800;
+      margin-bottom: 6px
+    }
+
+    .modal p {
+      color: var(--text-soft);
+      font-size: 14.5px;
+      margin-bottom: 18px
+    }
+
+    .modal .pick {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 12px;
+      border-radius: 14px;
+      background: var(--primary-light);
+      margin-bottom: 18px
+    }
+
+    .modal .pick img,
+    .modal .pick .ph2 {
+      width: 48px;
+      height: 48px;
+      border-radius: 12px;
+      object-fit: cover;
+      flex-shrink: 0;
+      background: linear-gradient(135deg, #bae6fd, #a7f3d0)
+    }
+
+    .modal .pick b {
+      display: block;
+      font-size: 14px;
+      font-weight: 800
+    }
+
+    .modal .pick small {
+      color: var(--text-soft);
+      font-size: 12.5px
+    }
+
+    .modal-btns {
+      display: flex;
+      gap: 10px
+    }
+
+    .btn {
+      padding: 12px 18px;
+      border-radius: 12px;
+      border: none;
+      cursor: pointer;
+      font-weight: 700;
+      font-size: 14px;
+      transition: all .15s ease;
+      flex: 1
+    }
+
+    .btn-primary {
+      background: linear-gradient(135deg, var(--primary), var(--accent));
+      color: #fff;
+      background-size: 200% 100%;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .btn-primary::before {
+      content: "";
+      position: absolute;
+      top: 0;
+      left: -100%;
+      width: 60%;
+      height: 100%;
+      background: linear-gradient(90deg, transparent, rgba(255, 255, 255, .4), transparent);
+      transform: skewX(-20deg);
+      transition: left .6s ease;
+    }
+
+    .btn-primary:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 10px 22px -4px rgba(14, 165, 233, .6);
+      background-position: 100% 0
+    }
+
+    .btn-primary:hover::before {
+      left: 120%
+    }
+
+    .btn-primary:active {
+      transform: translateY(0) scale(.97)
+    }
+
+    .btn-ghost {
+      background: #f1f5f9;
+      color: var(--text)
+    }
+
+    .btn-ghost:hover {
+      background: #e2e8f0;
+      transform: translateY(-1px)
+    }
+
+    .btn-ghost:active {
+      transform: translateY(0)
+    }
+
+    /* Loading skeleton */
+    .skeleton {
+      background: linear-gradient(90deg, #f1f5f9 0%, #e2e8f0 50%, #f1f5f9 100%);
+      background-size: 200% 100%;
+      animation: shimmer 1.4s infinite linear;
+    }
+
+    @keyframes shimmer {
+      from {
+        background-position: 200% 0
+      }
+
+      to {
+        background-position: -200% 0
+      }
+    }
+
+    footer {
+      max-width: 1200px;
+      margin: 60px auto 30px;
+      padding: 0 24px;
+      text-align: center;
+      color: var(--text-mute);
+      font-size: 13px
+    }
+
+    footer .heart {
+      color: #ef4444
+    }
+
+    /* ===== Tablet ===== */
+    @media (max-width:900px) {
+      .hero {
+        padding: 32px 16px 8px
+      }
+
+      main {
+        padding: 18px 14px
+      }
+
+      .grid {
+        gap: 16px;
+        grid-template-columns: repeat(auto-fill, minmax(240px, 1fr))
+      }
+
+      .question-card {
+        margin: 24px 14px 4px;
+        padding: 16px 18px;
+        border-radius: 18px
+      }
+
+      .thank-banner {
+        margin-left: 14px;
+        margin-right: 14px
+      }
+
+      footer {
+        margin-top: 40px;
+        padding: 0 16px
+      }
+    }
+
+    /* ===== Mobile ===== */
+    @media (max-width:600px) {
+      body {
+        background-attachment: scroll
+      }
+
+      .blob.b1 {
+        width: 240px;
+        height: 240px
+      }
+
+      .blob.b2 {
+        width: 200px;
+        height: 200px
+      }
+
+      .blob.b3 {
+        width: 180px;
+        height: 180px
+      }
+
+      .topbar-inner {
+        padding: 10px 14px;
+        gap: 10px
+      }
+
+      .brand {
+        gap: 10px
+      }
+
+      .brand-logo {
+        width: 36px;
+        height: 36px;
+        border-radius: 10px
+      }
+
+      .brand-logo svg {
+        width: 18px;
+        height: 18px
+      }
+
+      .brand-text {
+        font-size: 14px
+      }
+
+      .brand-text small {
+        font-size: 10px
+      }
+
+      .top-actions .chip {
+        padding: 6px 10px;
+        font-size: 11px
+      }
+
+      .hero {
+        padding: 24px 16px 4px
+      }
+
+      .eyebrow {
+        font-size: 10.5px;
+        padding: 5px 12px
+      }
+
+      h1.title {
+        font-size: 26px;
+        margin: 14px auto 8px;
+        line-height: 1.15
+      }
+
+      .subtitle {
+        font-size: 14px;
+        line-height: 1.45
+      }
+
+      .question-card {
+        margin: 18px 14px 4px;
+        padding: 14px 16px;
+        border-radius: 16px;
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 10px;
+      }
+
+      .question-card .q {
+        font-size: 16px;
+        gap: 10px
+      }
+
+      .q-ic {
+        width: 38px;
+        height: 38px;
+        border-radius: 11px
+      }
+
+      .q-ic svg {
+        width: 20px;
+        height: 20px
+      }
+
+      .q-meta {
+        font-size: 12px;
+        gap: 14px;
+        flex-wrap: wrap
+      }
+
+      main {
+        padding: 16px 10px
+      }
+
+      .grid {
+        gap: 10px;
+        grid-template-columns: repeat(2, 1fr);
+      }
+
+      .card {
+        border-radius: 16px
+      }
+
+      .card .ph {
+        aspect-ratio: 1/1
+      }
+
+      .info {
+        padding: 10px 10px 12px;
+        gap: 6px
+      }
+
+      .name {
+        font-size: 13px;
+        line-height: 1.25;
+        font-weight: 700
+      }
+
+      .dob {
+        font-size: 11px;
+        gap: 4px
+      }
+
+      .dob svg {
+        width: 12px;
+        height: 12px
+      }
+
+      .meta-list {
+        gap: 3px;
+        margin-top: 2px
+      }
+
+      .meta-row {
+        font-size: 11px;
+        gap: 4px
+      }
+
+      .tag {
+        font-size: 10px;
+        padding: 3px 7px;
+        gap: 4px
+      }
+
+      .vote-btn {
+        padding: 10px 8px;
+        font-size: 12.5px;
+        border-radius: 10px;
+        gap: 5px
+      }
+
+      .vote-btn svg {
+        width: 14px;
+        height: 14px
+      }
+
+      .badge-rank {
+        padding: 4px 8px;
+        font-size: 10px;
+        top: 8px;
+        left: 8px;
+        gap: 3px
+      }
+
+      .results-row {
+        gap: 6px
+      }
+
+      .res-info {
+        font-size: 11px
+      }
+
+      .res-info b {
+        font-size: 13px
+      }
+
+      .your-pick {
+        font-size: 9.5px;
+        padding: 3px 7px
+      }
+
+      .bar-wrap {
+        height: 8px
+      }
+
+      .thank-banner {
+        margin: 16px 12px 0;
+        padding: 14px 16px;
+        border-radius: 16px;
+        flex-direction: column;
+        align-items: flex-start;
+      }
+
+      .thank-banner .left {
+        gap: 12px;
+        align-items: flex-start
+      }
+
+      .thank-icon {
+        width: 40px;
+        height: 40px;
+        border-radius: 11px
+      }
+
+      .thank-icon svg {
+        width: 22px;
+        height: 22px
+      }
+
+      .thank-banner h3 {
+        font-size: 15px;
+        line-height: 1.3
+      }
+
+      .thank-banner p {
+        font-size: 12.5px;
+        line-height: 1.4
+      }
+
+      .modal {
+        padding: 20px;
+        border-radius: 18px
+      }
+
+      .modal h3 {
+        font-size: 17px
+      }
+
+      .modal p {
+        font-size: 13.5px
+      }
+
+      .modal .pick b {
+        font-size: 13px
+      }
+
+      .modal .pick small {
+        font-size: 11.5px
+      }
+
+      .btn {
+        padding: 11px 14px;
+        font-size: 13.5px
+      }
+
+      footer {
+        font-size: 12px;
+        margin: 40px auto 24px
+      }
+    }
+
+    /* ===== Very small phones ===== */
+    @media (max-width:380px) {
+      h1.title {
+        font-size: 22px
+      }
+
+      .subtitle {
+        font-size: 13px
+      }
+
+      .question-card .q {
+        font-size: 15px
+      }
+
+      .top-actions .chip {
+        display: none
+      }
+
+      .modal-btns {
+        flex-direction: column-reverse
+      }
+
+      .grid {
+        gap: 8px
+      }
+
+      main {
+        padding: 14px 8px
+      }
+
+      .name {
+        font-size: 12px
+      }
+
+      .meta-row {
+        font-size: 10.5px
+      }
+
+      .vote-btn {
+        padding: 9px 6px;
+        font-size: 11.5px
+      }
+
+      .badge-rank {
+        font-size: 9.5px;
+        padding: 3px 7px
+      }
+    }
+
+    /* ===== Reduced motion ===== */
+    @media (prefers-reduced-motion: reduce) {
+
+      *,
+      *::before,
+      *::after {
+        animation-duration: .01ms !important;
+        animation-iteration-count: 1 !important;
+        transition-duration: .01ms !important;
+      }
+
+      .blob {
+        display: none
+      }
+    }
+  </style>
 </head>
+
 <body>
 
-<div class="bg-blobs">
-  <div class="blob b1"></div>
-  <div class="blob b2"></div>
-  <div class="blob b3"></div>
-</div>
+  <div class="bg-blobs">
+    <div class="blob b1"></div>
+    <div class="blob b2"></div>
+    <div class="blob b3"></div>
+  </div>
 
-<canvas id="confetti" style="position:fixed;inset:0;pointer-events:none;z-index:200;display:none"></canvas>
+  <canvas id="confetti" style="position:fixed;inset:0;pointer-events:none;z-index:200;display:none"></canvas>
 
-<header class="topbar">
-  <div class="topbar-inner">
-    <div class="brand">
-      <div class="brand-logo">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M19 14c1.49-1.46 3-3.21 3-5.5A5.5 5.5 0 0 0 16.5 3c-1.76 0-3 .5-4.5 2-1.5-1.5-2.74-2-4.5-2A5.5 5.5 0 0 0 2 8.5c0 2.29 1.51 4.04 3 5.5l7 7Z"/></svg>
+  <header class="topbar">
+    <div class="topbar-inner">
+      <div class="brand">
+        <div class="brand-logo">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"
+            stroke-linejoin="round">
+            <path
+              d="M19 14c1.49-1.46 3-3.21 3-5.5A5.5 5.5 0 0 0 16.5 3c-1.76 0-3 .5-4.5 2-1.5-1.5-2.74-2-4.5-2A5.5 5.5 0 0 0 2 8.5c0 2.29 1.51 4.04 3 5.5l7 7Z" />
+          </svg>
+        </div>
+        <div class="brand-text">
+          <span>Ашық дауыс беру алаңы</span>
+        </div>
       </div>
-      <div class="brand-text">
-        <span>Үздік мейіргерлер жарысы</span>
-        <small>Ашық дауыс беру алаңы</small>
+      <div class="top-actions">
+        <span class="chip"><span class="dot"></span> <span id="liveCount">0</span> дауыс</span>
       </div>
     </div>
-    <div class="top-actions">
-      <span class="chip"><span class="dot"></span> <span id="liveCount">0</span> дауыс</span>
+  </header>
+
+  <section class="hero">
+    <span class="eyebrow"><span class="pulse"></span> Live дауыс беру</span>
+    <h1 class="title">Көп бейінді қалалық аурухананың таңдаулы мейіргерлері</h1>
+    <p class="subtitle">Кәсіби шеберлігімен, мейірімімен және адалдығымен ерекшеленген мейіргерлерге дауыс беріп, өз
+      таңдауыңызды жасаңыз.</p>
+  </section>
+
+  <div class="question-card">
+    <div class="q">
+      <div class="q-ic">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+          stroke-linejoin="round">
+          <circle cx="12" cy="12" r="10" />
+          <path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3" />
+          <line x1="12" y1="17" x2="12.01" y2="17" />
+        </svg>
+      </div>
+      <span>Сіз таңдаған мейіргер?</span>
+    </div>
+    <div class="q-meta">
+      <span>Барлығы: <b id="totalVotes">0</b></span>
+      <span>Үміткерлер: <b id="totalNurses">0</b></span>
     </div>
   </div>
-</header>
 
-<section class="hero">
-  <span class="eyebrow"><span class="pulse"></span> Live дауыс беру</span>
-  <h1 class="title">Көп бейінді қалалық аурухананың таңдаулы мейіргерлері</h1>
-  <p class="subtitle">Кәсіби шеберлігімен, мейірімімен және адалдығымен ерекшеленген мейіргерлерге дауыс беріп, өз таңдауыңызды жасаңыз.</p>
-</section>
-
-<div class="question-card">
-  <div class="q">
-    <div class="q-ic">
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
-    </div>
-    <span>Сіз таңдаған мейіргер?</span>
-  </div>
-  <div class="q-meta">
-    <span>Барлығы: <b id="totalVotes">0</b></span>
-    <span>Үміткерлер: <b id="totalNurses">0</b></span>
-  </div>
-</div>
-
-<div id="thankBanner" class="thank-banner" style="display:none">
-  <div class="left">
-    <div class="thank-icon">
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
-    </div>
-    <div>
-      <h3>Сіздің таңдауыңыз сақталды. Рахмет!</h3>
-      <p>Сіз <b id="thankPick">—</b> үшін дауыс бердіңіз. Төменде ағымдағы рейтинг көрсетілген.</p>
+  <div id="thankBanner" class="thank-banner" style="display:none">
+    <div class="left">
+      <div class="thank-icon">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"
+          stroke-linejoin="round">
+          <polyline points="20 6 9 17 4 12" />
+        </svg>
+      </div>
+      <div>
+        <h3>Сіздің таңдауыңыз сақталды. Рахмет!</h3>
+        <p>Сіз <b id="thankPick">—</b> үшін дауыс бердіңіз. Төменде ағымдағы рейтинг көрсетілген.</p>
+      </div>
     </div>
   </div>
-</div>
 
 
-<main>
-  <div id="grid" class="grid"></div>
-</main>
+  <main>
+    <div id="grid" class="grid"></div>
+  </main>
 
-<div id="modal" class="modal-bg" role="dialog" aria-modal="true">
-  <div class="modal">
-    <h3>Таңдауыңызды растайсыз ба?</h3>
-    <p>Дауыс бір рет қана беріледі және оны өзгерте алмайсыз.</p>
-    <div class="pick" id="modalPick"></div>
-    <div class="modal-btns">
-      <button class="btn btn-ghost" id="cancelBtn">Болдырмау</button>
-      <button class="btn btn-primary" id="confirmBtn">Иә, дауыс беру</button>
+  <div id="modal" class="modal-bg" role="dialog" aria-modal="true">
+    <div class="modal">
+      <h3>Таңдауыңызды растайсыз ба?</h3>
+      <p>Дауыс бір рет қана беріледі және оны өзгерте алмайсыз.</p>
+      <div class="pick" id="modalPick"></div>
+      <div class="modal-btns">
+        <button class="btn btn-ghost" id="cancelBtn">Болдырмау</button>
+        <button class="btn btn-primary" id="confirmBtn">Иә, дауыс беру</button>
+      </div>
     </div>
   </div>
-</div>
 
-<footer>
-  © <span id="year"></span> Үздік мейіргерлер жарысы. Барлық дауыстар құпия және қауіпсіз сақталады.
-</footer>
+  <footer>
+    © <span id="year"></span> Ашық дауыс беру алаңы. Барлық дауыстар құпия және қауіпсіз сақталады. by bibon
+  </footer>
 
-<script type="module">
-  import { initializeApp } from "https://www.gstatic.com/firebasejs/10.13.2/firebase-app.js";
-  import {
-    getFirestore, doc, getDoc, setDoc, collection, runTransaction, onSnapshot, serverTimestamp, increment
-  } from "https://www.gstatic.com/firebasejs/10.13.2/firebase-firestore.js";
+  <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.13.2/firebase-app.js";
+    import {
+      getFirestore, doc, getDoc, setDoc, collection, runTransaction, onSnapshot, serverTimestamp, increment
+    } from "https://www.gstatic.com/firebasejs/10.13.2/firebase-firestore.js";
 
-  const firebaseConfig = {
-    apiKey: "AIzaSyAQlLh2Abk92sZVCSsYSCxvps4Uld3C1Lk",
-    authDomain: "bibonrat.firebaseapp.com",
-    databaseURL: "https://bibonrat-default-rtdb.asia-southeast1.firebasedatabase.app",
-    projectId: "bibonrat",
-    storageBucket: "bibonrat.firebasestorage.app",
-    messagingSenderId: "78759159251",
-    appId: "1:78759159251:web:3e40d7d5a2aa762f01bb26"
-  };
+    const firebaseConfig = {
+      apiKey: "AIzaSyAQlLh2Abk92sZVCSsYSCxvps4Uld3C1Lk",
+      authDomain: "bibonrat.firebaseapp.com",
+      databaseURL: "https://bibonrat-default-rtdb.asia-southeast1.firebasedatabase.app",
+      projectId: "bibonrat",
+      storageBucket: "bibonrat.firebasestorage.app",
+      messagingSenderId: "78759159251",
+      appId: "1:78759159251:web:3e40d7d5a2aa762f01bb26"
+    };
 
-  const app  = initializeApp(firebaseConfig);
-  const db   = getFirestore(app);
+    const app = initializeApp(firebaseConfig);
+    const db = getFirestore(app);
 
-  // Storage URL-дерін тікелей құру (SDK қоңырауысыз — лезде)
-  const STORAGE_BUCKET = firebaseConfig.storageBucket;
-  const photoUrl = (filename) =>
-    `https://firebasestorage.googleapis.com/v0/b/${STORAGE_BUCKET}/o/${encodeURIComponent("VoiceAvatar/" + filename)}?alt=media`;
+    // Storage URL-дерін тікелей құру (SDK қоңырауысыз — лезде)
+    const STORAGE_BUCKET = firebaseConfig.storageBucket;
+    const photoUrl = (filename) =>
+      `https://firebasestorage.googleapis.com/v0/b/${STORAGE_BUCKET}/o/${encodeURIComponent("VoiceAvatar/" + filename)}?alt=media`;
 
-  // ---------- Үміткерлер тізімі ----------
-  // photo — Firebase Storage "VoiceAvatar/" папкасындағы файл аты.
-  const NURSES = [
-    {
-      id: "nurse_1",
-      name: "Наурызбаева Лайля Сериковна",
-      dob:  "13.01.1981",
-      department: "Терапия 2 бөлімінің мейіргері",
-      category:   "Жоғары",
-      experience: "23 жыл",
-      photo: "1.jpeg"
-    },
-    {
-      id: "nurse_2",
-      name: "Сағындықова Ләйла Жаңабергенқызы",
-      dob:  "26.05.1995",
-      department: "Терапия 1 бөлімінің мейіргері",
-      category:   "Екінші",
-      experience: "6 жыл",
-      photo: "2.jpeg"
-    },
-    {
-      id: "nurse_3",
-      name: "Темирланова Индира Сериковна",
-      dob:  "07.09.1986",
-      department: "Физиотерапия бөлімінің мейіргері",
-      category:   "Жоғары",
-      experience: "18 жыл",
-      photo: "3.jpeg"
-    },
-    {
-      id: "nurse_4",
-      name: "Қалмұрзаева Айгүл Сағынбайқызы",
-      dob:  "19.07.1983",
-      department: "Ақылы бөлімінің мейіргері",
-      category:   "Жоғары",
-      experience: "23 жыл",
-      photo: "4.jpeg"
-    },
-    {
-      id: "nurse_5",
-      name: "Мендібаева Қызғалдақ Асылханқызы",
-      dob:  "17.08.1995",
-      department: "Травматология бөлімінің мейіргері",
-      category:   "Бірінші",
-      experience: "10 жыл",
-      photo: "5.jpeg"
-    },
-    {
-      id: "nurse_6",
-      name: "Оспанова Жанагүл Бисембиевна",
-      dob:  "01.01.1971",
-      department: "Жансақтау бөлімінің мейіргері",
-      category:   "Жоғары",
-      experience: "40 жыл",
-      photo: "6.jpeg"
-    },
-    {
-      id: "nurse_7",
-      name: "Әбдірше Салтанат Тасболатқызы",
-      dob:  "19.12.1999",
-      department: "Хирургия бөлімінің мейіргері",
-      category:   "—",
-      experience: "8 жыл",
-      photo: "7.jpeg"
-    },
-    {
-      id: "nurse_8",
-      name: "Қамрадин Гүлшат Самдинқызы",
-      dob:  "21.10.1984",
-      department: "Гинекология бөлімінің мейіргері",
-      category:   "Жоғары",
-      experience: "17 жыл",
-      photo: "8.jpeg"
-    },
-    {
-      id: "nurse_9",
-      name: "Зарлықов Абдат Талғатбекұлы",
-      dob:  "21.09.1998",
-      department: "Нейроинсульт бөлімінің мейіргері",
-      category:   "—",
-      experience: "6 жыл",
-      photo: "9.jpeg"
-    },
-    {
-      id: "nurse_10",
-      name: "Тынымбаев Бауыржан Бақытбекұлы",
-      dob:  "03.02.2000",
-      department: "Қабылдау бөлімінің мейіргері",
-      category:   "—",
-      experience: "4 жыл",
-      photo: "10.jpeg"
+    // ---------- Үміткерлер тізімі ----------
+    // photo — Firebase Storage "VoiceAvatar/" папкасындағы файл аты.
+    const NURSES = [
+      {
+        id: "nurse_1",
+        name: "Наурызбаева Лайля Сериковна",
+        dob: "13.01.1981",
+        department: "Терапия 2 бөлімінің мейіргері",
+        category: "Жоғары",
+        experience: "23 жыл",
+        photo: "1.jpeg"
+      },
+      {
+        id: "nurse_2",
+        name: "Сағындықова Ләйла Жаңабергенқызы",
+        dob: "26.05.1995",
+        department: "Терапия 1 бөлімінің мейіргері",
+        category: "Екінші",
+        experience: "6 жыл",
+        photo: "2.jpeg"
+      },
+      {
+        id: "nurse_3",
+        name: "Темирланова Индира Сериковна",
+        dob: "07.09.1986",
+        department: "Физиотерапия бөлімінің мейіргері",
+        category: "Жоғары",
+        experience: "18 жыл",
+        photo: "3.jpeg"
+      },
+      {
+        id: "nurse_4",
+        name: "Қалмұрзаева Айгүл Сағынбайқызы",
+        dob: "19.07.1983",
+        department: "Ақылы бөлімінің мейіргері",
+        category: "Жоғары",
+        experience: "23 жыл",
+        photo: "4.jpeg"
+      },
+      {
+        id: "nurse_5",
+        name: "Мендібаева Қызғалдақ Асылханқызы",
+        dob: "17.08.1995",
+        department: "Травматология бөлімінің мейіргері",
+        category: "Бірінші",
+        experience: "10 жыл",
+        photo: "5.jpeg"
+      },
+      {
+        id: "nurse_6",
+        name: "Оспанова Жанагүл Бисембиевна",
+        dob: "01.01.1971",
+        department: "Жансақтау бөлімінің мейіргері",
+        category: "Жоғары",
+        experience: "40 жыл",
+        photo: "6.jpeg"
+      },
+      {
+        id: "nurse_7",
+        name: "Әбдірше Салтанат Тасболатқызы",
+        dob: "19.12.1999",
+        department: "Хирургия бөлімінің мейіргері",
+        category: "—",
+        experience: "8 жыл",
+        photo: "7.jpeg"
+      },
+      {
+        id: "nurse_8",
+        name: "Қамрадин Гүлшат Самдинқызы",
+        dob: "21.10.1984",
+        department: "Гинекология бөлімінің мейіргері",
+        category: "Жоғары",
+        experience: "17 жыл",
+        photo: "8.jpeg"
+      },
+      {
+        id: "nurse_9",
+        name: "Зарлықов Абдат Талғатбекұлы",
+        dob: "21.09.1998",
+        department: "Нейроинсульт бөлімінің мейіргері",
+        category: "—",
+        experience: "6 жыл",
+        photo: "9.jpeg"
+      },
+      {
+        id: "nurse_10",
+        name: "Тынымбаев Бауыржан Бақытбекұлы",
+        dob: "03.02.2000",
+        department: "Қабылдау бөлімінің мейіргері",
+        category: "—",
+        experience: "4 жыл",
+        photo: "10.jpeg"
+      }
+    ];
+
+    const $ = (s) => document.querySelector(s);
+    const grid = $("#grid");
+    const VOTE_KEY = "nurse_vote_v1_bibonrat";  // UI кэші — Firebase жауабын күтпей көрсету үшін
+    let voteCounts = {};       // { nurseId: number }
+    const photoUrls = Object.fromEntries(NURSES.map(n => [n.id, photoUrl(n.photo)]));
+    let alreadyVoted = !!localStorage.getItem(VOTE_KEY);
+    let votedFor = localStorage.getItem(VOTE_KEY) || null;
+    let voterId = null;        // IP + OS негізіндегі fingerprint (немесе fallback)
+
+    // ---------- IP + OS fingerprint ----------
+    function detectOS() {
+      const ua = navigator.userAgent;
+      if (/Android/i.test(ua)) return "Android";
+      if (/iPhone|iPad|iPod/i.test(ua)) return "iOS";
+      if (/Windows/i.test(ua)) return "Windows";
+      if (/Mac OS X|Macintosh/i.test(ua)) return "macOS";
+      if (/Linux/i.test(ua)) return "Linux";
+      return "Other";
     }
-  ];
 
-  const $ = (s) => document.querySelector(s);
-  const grid = $("#grid");
-  const VOTE_KEY = "nurse_vote_v1_bibonrat";  // UI кэші — Firebase жауабын күтпей көрсету үшін
-  let voteCounts = {};       // { nurseId: number }
-  const photoUrls = Object.fromEntries(NURSES.map(n => [n.id, photoUrl(n.photo)]));
-  let alreadyVoted = !!localStorage.getItem(VOTE_KEY);
-  let votedFor = localStorage.getItem(VOTE_KEY) || null;
-  let voterId = null;        // IP + OS негізіндегі fingerprint (немесе fallback)
+    function detectBrowser() {
+      const ua = navigator.userAgent;
+      if (/Edg\//i.test(ua)) return "Edge";
+      if (/OPR\/|Opera/i.test(ua)) return "Opera";
+      if (/SamsungBrowser/i.test(ua)) return "Samsung Internet";
+      if (/YaBrowser/i.test(ua)) return "Yandex";
+      if (/Firefox/i.test(ua)) return "Firefox";
+      if (/Chrome/i.test(ua)) return "Chrome";
+      if (/Safari/i.test(ua)) return "Safari";
+      return "Other";
+    }
 
-  // ---------- IP + OS fingerprint ----------
-  function detectOS(){
-    const ua = navigator.userAgent;
-    if(/Android/i.test(ua))            return "Android";
-    if(/iPhone|iPad|iPod/i.test(ua))   return "iOS";
-    if(/Windows/i.test(ua))            return "Windows";
-    if(/Mac OS X|Macintosh/i.test(ua)) return "macOS";
-    if(/Linux/i.test(ua))              return "Linux";
-    return "Other";
-  }
-
-  function detectBrowser(){
-    const ua = navigator.userAgent;
-    if(/Edg\//i.test(ua))                return "Edge";
-    if(/OPR\/|Opera/i.test(ua))          return "Opera";
-    if(/SamsungBrowser/i.test(ua))       return "Samsung Internet";
-    if(/YaBrowser/i.test(ua))            return "Yandex";
-    if(/Firefox/i.test(ua))              return "Firefox";
-    if(/Chrome/i.test(ua))               return "Chrome";
-    if(/Safari/i.test(ua))               return "Safari";
-    return "Other";
-  }
-
-  // IP info — кэштелген (бір рет қана сұраймыз)
-  let _ipInfoPromise = null;
-  function fetchIPInfo(){
-    if(_ipInfoPromise) return _ipInfoPromise;
-    _ipInfoPromise = (async ()=>{
-      // 1) Толық деректер — ipapi.co (қала, ел, ISP, ASN, координаталар)
-      try{
-        const ctrl = new AbortController();
-        const t = setTimeout(()=>ctrl.abort(), 5000);
-        const res = await fetch("https://ipapi.co/json/", {cache:"no-store", signal:ctrl.signal});
-        clearTimeout(t);
-        const d = await res.json();
-        if(d && d.ip) return d;
-      }catch{}
-      // 2) Fallback — тек IP
-      for(const url of ["https://api.ipify.org?format=json", "https://api64.ipify.org?format=json"]){
-        try{
+    // IP info — кэштелген (бір рет қана сұраймыз)
+    let _ipInfoPromise = null;
+    function fetchIPInfo() {
+      if (_ipInfoPromise) return _ipInfoPromise;
+      _ipInfoPromise = (async () => {
+        // 1) Толық деректер — ipapi.co (қала, ел, ISP, ASN, координаталар)
+        try {
           const ctrl = new AbortController();
-          const t = setTimeout(()=>ctrl.abort(), 4000);
-          const res = await fetch(url, {cache:"no-store", signal:ctrl.signal});
+          const t = setTimeout(() => ctrl.abort(), 5000);
+          const res = await fetch("https://ipapi.co/json/", { cache: "no-store", signal: ctrl.signal });
           clearTimeout(t);
           const d = await res.json();
-          if(d && d.ip) return { ip: d.ip };
-        }catch{}
-      }
-      return {};
-    })();
-    return _ipInfoPromise;
-  }
-
-  async function sha256(text){
-    const buf = await crypto.subtle.digest("SHA-256", new TextEncoder().encode(text));
-    return Array.from(new Uint8Array(buf)).map(b => b.toString(16).padStart(2,"0")).join("");
-  }
-
-  async function buildVoterId(){
-    const os = detectOS();
-    const info = await fetchIPInfo();
-    if(info.ip){
-      // Бір IP + бір OS = бір дауыс. Browser data тазалау көмектеспейді.
-      const hash = await sha256(info.ip + "__" + os);
-      return "fp_" + hash.slice(0, 28);
-    }
-    // Fallback: IP алынбаса, тұрақты локал ID (әлсіз қорғаныс)
-    let local = localStorage.getItem("voter_local_id_v1");
-    if(!local){
-      local = "loc_" + Math.random().toString(36).slice(2,10) + Date.now().toString(36);
-      localStorage.setItem("voter_local_id_v1", local);
-    }
-    return local;
-  }
-
-  // ---------- Метадеректерді жинау ----------
-  function getGPUInfo(){
-    try{
-      const c = document.createElement("canvas");
-      const gl = c.getContext("webgl") || c.getContext("experimental-webgl");
-      if(!gl) return { vendor:null, renderer:null };
-      const dbg = gl.getExtension("WEBGL_debug_renderer_info");
-      if(dbg){
-        return {
-          vendor:   gl.getParameter(dbg.UNMASKED_VENDOR_WEBGL),
-          renderer: gl.getParameter(dbg.UNMASKED_RENDERER_WEBGL)
-        };
-      }
-      return { vendor: gl.getParameter(gl.VENDOR), renderer: gl.getParameter(gl.RENDERER) };
-    }catch{ return { vendor:null, renderer:null }; }
-  }
-
-  // Локалды IP-ді WebRTC арқылы алу (браузерлер mDNS .local қайтаруы мүмкін)
-  function getLocalIPs(){
-    return new Promise(resolve=>{
-      const ips = new Set();
-      try{
-        const RTC = window.RTCPeerConnection || window.webkitRTCPeerConnection || window.mozRTCPeerConnection;
-        if(!RTC){ resolve([]); return; }
-        const pc = new RTC({ iceServers: [] });
-        pc.createDataChannel("");
-        pc.onicecandidate = (e)=>{
-          if(!e || !e.candidate || !e.candidate.candidate){
-            try{ pc.close(); }catch{}
-            resolve(Array.from(ips));
-            return;
-          }
-          const m = e.candidate.candidate.match(/(\d{1,3}(\.\d{1,3}){3}|[a-f0-9]+(:[a-f0-9]*)+(:\d+)?|[\w-]+\.local)/i);
-          if(m && m[0]) ips.add(m[0]);
-        };
-        pc.createOffer().then(o=>pc.setLocalDescription(o)).catch(()=>resolve([]));
-        setTimeout(()=>{ try{pc.close();}catch{}; resolve(Array.from(ips)); }, 1500);
-      }catch{ resolve([]); }
-    });
-  }
-
-  async function getCanvasFingerprint(){
-    try{
-      const c = document.createElement("canvas");
-      c.width = 240; c.height = 60;
-      const ctx = c.getContext("2d");
-      ctx.textBaseline = "top";
-      ctx.font = "16px Arial";
-      ctx.fillStyle = "#f60";
-      ctx.fillRect(0, 0, 240, 60);
-      ctx.fillStyle = "#069";
-      ctx.fillText("VoiceDoctor 🏥 fingerprint", 2, 2);
-      ctx.fillStyle = "rgba(102,204,0,.7)";
-      ctx.fillText("VoiceDoctor 🏥 fingerprint", 4, 4);
-      return (await sha256(c.toDataURL())).slice(0, 24);
-    }catch{ return null; }
-  }
-
-  async function collectMetadata(){
-    const nav = navigator;
-    const scr = screen;
-    const conn = nav.connection || nav.mozConnection || nav.webkitConnection || {};
-    const [ip, gpu, canvasHash, localIps] = await Promise.all([
-      fetchIPInfo(),
-      Promise.resolve(getGPUInfo()),
-      getCanvasFingerprint(),
-      getLocalIPs()
-    ]);
-    return {
-      // Уақыт
-      collectedAt: new Date().toISOString(),
-
-      // IP / геолокация (IP бойынша, рұқсатсыз)
-      ip: ip.ip || null,
-      localIps: localIps || [],
-      localIp: (localIps && localIps[0]) || null,
-      ipVersion: ip.version || null,
-      city: ip.city || null,
-      region: ip.region || null,
-      country: ip.country_name || ip.country || null,
-      countryCode: ip.country_code || null,
-      postal: ip.postal || null,
-      latitude: ip.latitude || null,
-      longitude: ip.longitude || null,
-      org: ip.org || null,
-      asn: ip.asn || null,
-      utcOffset: ip.utc_offset || null,
-      currency: ip.currency || null,
-
-      // OS / құрылғы
-      os: detectOS(),
-      browser: detectBrowser(),
-      userAgent: nav.userAgent,
-      uaPlatform: nav.userAgentData?.platform || null,
-      uaMobile: nav.userAgentData?.mobile || null,
-      platform: nav.platform || null,
-      vendor: nav.vendor || null,
-      cpuCores: nav.hardwareConcurrency || null,
-      deviceMemoryGB: nav.deviceMemory || null,
-      maxTouchPoints: nav.maxTouchPoints || 0,
-
-      // Экран
-      screenW: scr.width,
-      screenH: scr.height,
-      availW: scr.availWidth,
-      availH: scr.availHeight,
-      colorDepth: scr.colorDepth,
-      pixelDepth: scr.pixelDepth,
-      pixelRatio: window.devicePixelRatio || 1,
-      viewportW: window.innerWidth,
-      viewportH: window.innerHeight,
-      orientation: scr.orientation?.type || null,
-
-      // Тіл, уақыт белдеуі
-      language: nav.language || null,
-      languages: (nav.languages || []).slice(0, 6),
-      timezone: Intl.DateTimeFormat().resolvedOptions().timeZone || null,
-      timezoneOffsetMin: new Date().getTimezoneOffset(),
-
-      // Желі
-      connectionType: conn.effectiveType || null,
-      downlinkMbps: conn.downlink || null,
-      rttMs: conn.rtt || null,
-      saveData: conn.saveData || false,
-      online: nav.onLine,
-
-      // Браузер мүмкіндіктері
-      cookiesEnabled: nav.cookieEnabled,
-      doNotTrack: nav.doNotTrack || window.doNotTrack || null,
-      pdfViewerEnabled: nav.pdfViewerEnabled || false,
-      webdriver: nav.webdriver || false,  // bot белгісі
-      javaEnabled: typeof nav.javaEnabled === "function" ? nav.javaEnabled() : false,
-
-      // GPU + canvas fingerprint
-      gpuVendor: gpu.vendor,
-      gpuRenderer: gpu.renderer,
-      canvasFp: canvasHash,
-
-      // Бет контексті
-      referrer: document.referrer || null,
-      pageUrl: location.href,
-      pageTitle: document.title
-    };
-  }
-
-  // visitors/{voterId} — әр уникалды fingerprint үшін бір құжат
-  async function logVisit(meta){
-    if(!voterId) return;
-    try{
-      const ref = doc(db, "visitors", voterId);
-      const snap = await getDoc(ref);
-      if(snap.exists()){
-        await setDoc(ref, {
-          ...meta,
-          lastSeen: serverTimestamp(),
-          visitCount: increment(1)
-        }, { merge: true });
-      } else {
-        await setDoc(ref, {
-          ...meta,
-          firstSeen: serverTimestamp(),
-          lastSeen: serverTimestamp(),
-          visitCount: 1
-        });
-      }
-    }catch(err){
-      console.warn("[visit] жазу қатесі:", err.code || err.message);
-    }
-  }
-
-  document.getElementById("year").textContent = new Date().getFullYear();
-  document.getElementById("totalNurses").textContent = NURSES.length;
-
-  // ---------- Topbar shadow on scroll ----------
-  const topbar = document.querySelector(".topbar");
-  window.addEventListener("scroll", ()=>{
-    topbar.classList.toggle("scrolled", window.scrollY > 8);
-  }, {passive:true});
-
-  // ---------- Анимациялық цифр ----------
-  function animateNumber(el, to, dur=900){
-    if(!el) return;
-    const from = Number(el.textContent.replace(/\D/g,"")) || 0;
-    if(from === to){ el.textContent = to; return; }
-    const start = performance.now();
-    function tick(now){
-      const t = Math.min(1, (now - start) / dur);
-      const eased = 1 - Math.pow(1 - t, 3);
-      el.textContent = Math.round(from + (to - from) * eased);
-      if(t < 1) requestAnimationFrame(tick);
-    }
-    requestAnimationFrame(tick);
-  }
-
-  // ---------- Confetti ----------
-  function fireConfetti(){
-    const cv = document.getElementById("confetti");
-    const ctx = cv.getContext("2d");
-    cv.style.display = "block";
-    const W = cv.width = window.innerWidth;
-    const H = cv.height = window.innerHeight;
-    const colors = ["#0ea5e9","#10b981","#f59e0b","#ef4444","#8b5cf6","#ec4899","#22d3ee"];
-    const N = 160;
-    const parts = Array.from({length:N}).map(()=>({
-      x: W/2 + (Math.random()-.5)*200,
-      y: H*0.35 + (Math.random()-.5)*60,
-      vx: (Math.random()-.5) * 18,
-      vy: -Math.random() * 18 - 6,
-      g: 0.45 + Math.random()*0.2,
-      size: 6 + Math.random()*8,
-      rot: Math.random()*Math.PI*2,
-      vr: (Math.random()-.5)*0.4,
-      color: colors[Math.floor(Math.random()*colors.length)],
-      shape: Math.random() < 0.5 ? "rect" : "circ",
-      life: 0,
-      maxLife: 120 + Math.random()*60
-    }));
-    let running = true;
-    function frame(){
-      ctx.clearRect(0,0,W,H);
-      let alive = 0;
-      for(const p of parts){
-        p.life++;
-        if(p.life > p.maxLife) continue;
-        alive++;
-        p.vy += p.g;
-        p.x += p.vx;
-        p.y += p.vy;
-        p.rot += p.vr;
-        ctx.save();
-        ctx.translate(p.x, p.y);
-        ctx.rotate(p.rot);
-        ctx.globalAlpha = Math.max(0, 1 - p.life / p.maxLife);
-        ctx.fillStyle = p.color;
-        if(p.shape === "rect"){
-          ctx.fillRect(-p.size/2, -p.size/3, p.size, p.size*0.6);
-        } else {
-          ctx.beginPath();
-          ctx.arc(0, 0, p.size/2, 0, Math.PI*2);
-          ctx.fill();
+          if (d && d.ip) return d;
+        } catch { }
+        // 2) Fallback — тек IP
+        for (const url of ["https://api.ipify.org?format=json", "https://api64.ipify.org?format=json"]) {
+          try {
+            const ctrl = new AbortController();
+            const t = setTimeout(() => ctrl.abort(), 4000);
+            const res = await fetch(url, { cache: "no-store", signal: ctrl.signal });
+            clearTimeout(t);
+            const d = await res.json();
+            if (d && d.ip) return { ip: d.ip };
+          } catch { }
         }
-        ctx.restore();
-      }
-      if(alive > 0 && running) requestAnimationFrame(frame);
-      else { cv.style.display = "none"; ctx.clearRect(0,0,W,H); }
+        return {};
+      })();
+      return _ipInfoPromise;
     }
-    requestAnimationFrame(frame);
-  }
 
-  // ---------- 1) Firestore "Voise" коллекциясынан дауыстарды алу (live) ----------
-  function listenVotes(){
-    onSnapshot(
-      collection(db, "Voise"),
-      snap=>{
-        voteCounts = {};
-        snap.forEach(d => { voteCounts[d.id] = (d.data().votes || 0); });
-        render();
-      },
-      err => {
-        console.error("[firestore] Voise оқу қатесі:", err.code, err.message);
-        render(); // дауыстар келмесе де карточкалар көрінсін
+    async function sha256(text) {
+      const buf = await crypto.subtle.digest("SHA-256", new TextEncoder().encode(text));
+      return Array.from(new Uint8Array(buf)).map(b => b.toString(16).padStart(2, "0")).join("");
+    }
+
+    async function buildVoterId() {
+      const os = detectOS();
+      const info = await fetchIPInfo();
+      if (info.ip) {
+        // Бір IP + бір OS = бір дауыс. Browser data тазалау көмектеспейді.
+        const hash = await sha256(info.ip + "__" + os);
+        return "fp_" + hash.slice(0, 28);
       }
-    );
-  }
+      // Fallback: IP алынбаса, тұрақты локал ID (әлсіз қорғаныс)
+      let local = localStorage.getItem("voter_local_id_v1");
+      if (!local) {
+        local = "loc_" + Math.random().toString(36).slice(2, 10) + Date.now().toString(36);
+        localStorage.setItem("voter_local_id_v1", local);
+      }
+      return local;
+    }
 
-  // ---------- 3) Карточкаларды салу ----------
-  let lastSignature = "";
-  function render(){
-    const total = Object.values(voteCounts).reduce((a,b)=>a+b,0);
-    animateNumber(document.getElementById("totalVotes"), total);
-    animateNumber(document.getElementById("liveCount"),  total);
+    // ---------- Метадеректерді жинау ----------
+    function getGPUInfo() {
+      try {
+        const c = document.createElement("canvas");
+        const gl = c.getContext("webgl") || c.getContext("experimental-webgl");
+        if (!gl) return { vendor: null, renderer: null };
+        const dbg = gl.getExtension("WEBGL_debug_renderer_info");
+        if (dbg) {
+          return {
+            vendor: gl.getParameter(dbg.UNMASKED_VENDOR_WEBGL),
+            renderer: gl.getParameter(dbg.UNMASKED_RENDERER_WEBGL)
+          };
+        }
+        return { vendor: gl.getParameter(gl.VENDOR), renderer: gl.getParameter(gl.RENDERER) };
+      } catch { return { vendor: null, renderer: null }; }
+    }
 
-    // тізімді сұрыптау (дауыс беруден кейін рейтинг бойынша)
-    const list = NURSES.map(n => ({...n, votes: voteCounts[n.id] || 0}));
-    if(alreadyVoted) list.sort((a,b)=> b.votes - a.votes);
+    // Локалды IP-ді WebRTC арқылы алу (браузерлер mDNS .local қайтаруы мүмкін)
+    function getLocalIPs() {
+      return new Promise(resolve => {
+        const ips = new Set();
+        try {
+          const RTC = window.RTCPeerConnection || window.webkitRTCPeerConnection || window.mozRTCPeerConnection;
+          if (!RTC) { resolve([]); return; }
+          const pc = new RTC({ iceServers: [] });
+          pc.createDataChannel("");
+          pc.onicecandidate = (e) => {
+            if (!e || !e.candidate || !e.candidate.candidate) {
+              try { pc.close(); } catch { }
+              resolve(Array.from(ips));
+              return;
+            }
+            const m = e.candidate.candidate.match(/(\d{1,3}(\.\d{1,3}){3}|[a-f0-9]+(:[a-f0-9]*)+(:\d+)?|[\w-]+\.local)/i);
+            if (m && m[0]) ips.add(m[0]);
+          };
+          pc.createOffer().then(o => pc.setLocalDescription(o)).catch(() => resolve([]));
+          setTimeout(() => { try { pc.close(); } catch { }; resolve(Array.from(ips)); }, 1500);
+        } catch { resolve([]); }
+      });
+    }
 
-    // Тек өзгеріс болғанда қайта рендер ету (бар анимациялар сақталады)
-    const sig = JSON.stringify({list:list.map(x=>[x.id,x.votes]), voted:votedFor, already:alreadyVoted, photos:Object.keys(photoUrls).length});
-    if(sig === lastSignature) return;
-    const isFirstRender = !lastSignature;
-    lastSignature = sig;
+    async function getCanvasFingerprint() {
+      try {
+        const c = document.createElement("canvas");
+        c.width = 240; c.height = 60;
+        const ctx = c.getContext("2d");
+        ctx.textBaseline = "top";
+        ctx.font = "16px Arial";
+        ctx.fillStyle = "#f60";
+        ctx.fillRect(0, 0, 240, 60);
+        ctx.fillStyle = "#069";
+        ctx.fillText("VoiceDoctor 🏥 fingerprint", 2, 2);
+        ctx.fillStyle = "rgba(102,204,0,.7)";
+        ctx.fillText("VoiceDoctor 🏥 fingerprint", 4, 4);
+        return (await sha256(c.toDataURL())).slice(0, 24);
+      } catch { return null; }
+    }
 
-    grid.innerHTML = "";
-    list.forEach((n,idx)=>{
-      const card = document.createElement("div");
-      card.className = "card" + (votedFor===n.id ? " selected" : "");
-      if(isFirstRender && idx < 6) card.style.setProperty("--delay", (idx * 0.05) + "s");
-      else card.style.setProperty("--delay", "0s");
+    async function collectMetadata() {
+      const nav = navigator;
+      const scr = screen;
+      const conn = nav.connection || nav.mozConnection || nav.webkitConnection || {};
+      const [ip, gpu, canvasHash, localIps] = await Promise.all([
+        fetchIPInfo(),
+        Promise.resolve(getGPUInfo()),
+        getCanvasFingerprint(),
+        getLocalIPs()
+      ]);
+      return {
+        // Уақыт
+        collectedAt: new Date().toISOString(),
 
-      const pct = total>0 ? Math.round((n.votes/total)*100) : 0;
-      const rankBadge = alreadyVoted
-        ? `<div class="badge-rank ${idx===0?'gold':idx===1?'silver':idx===2?'bronze':''}">#${idx+1}${idx===0?' 🏆':''}</div>`
-        : "";
+        // IP / геолокация (IP бойынша, рұқсатсыз)
+        ip: ip.ip || null,
+        localIps: localIps || [],
+        localIp: (localIps && localIps[0]) || null,
+        ipVersion: ip.version || null,
+        city: ip.city || null,
+        region: ip.region || null,
+        country: ip.country_name || ip.country || null,
+        countryCode: ip.country_code || null,
+        postal: ip.postal || null,
+        latitude: ip.latitude || null,
+        longitude: ip.longitude || null,
+        org: ip.org || null,
+        asn: ip.asn || null,
+        utcOffset: ip.utc_offset || null,
+        currency: ip.currency || null,
 
-      const isAboveFold = idx < 6;
-      const photo = photoUrls[n.id]
-        ? `<img src="${photoUrls[n.id]}" alt="${escapeHtml(n.name)}" width="400" height="400" decoding="async" loading="${isAboveFold?'eager':'lazy'}" fetchpriority="${isAboveFold?'high':'low'}"/>`
-        : `<div class="placeholder">
+        // OS / құрылғы
+        os: detectOS(),
+        browser: detectBrowser(),
+        userAgent: nav.userAgent,
+        uaPlatform: nav.userAgentData?.platform || null,
+        uaMobile: nav.userAgentData?.mobile || null,
+        platform: nav.platform || null,
+        vendor: nav.vendor || null,
+        cpuCores: nav.hardwareConcurrency || null,
+        deviceMemoryGB: nav.deviceMemory || null,
+        maxTouchPoints: nav.maxTouchPoints || 0,
+
+        // Экран
+        screenW: scr.width,
+        screenH: scr.height,
+        availW: scr.availWidth,
+        availH: scr.availHeight,
+        colorDepth: scr.colorDepth,
+        pixelDepth: scr.pixelDepth,
+        pixelRatio: window.devicePixelRatio || 1,
+        viewportW: window.innerWidth,
+        viewportH: window.innerHeight,
+        orientation: scr.orientation?.type || null,
+
+        // Тіл, уақыт белдеуі
+        language: nav.language || null,
+        languages: (nav.languages || []).slice(0, 6),
+        timezone: Intl.DateTimeFormat().resolvedOptions().timeZone || null,
+        timezoneOffsetMin: new Date().getTimezoneOffset(),
+
+        // Желі
+        connectionType: conn.effectiveType || null,
+        downlinkMbps: conn.downlink || null,
+        rttMs: conn.rtt || null,
+        saveData: conn.saveData || false,
+        online: nav.onLine,
+
+        // Браузер мүмкіндіктері
+        cookiesEnabled: nav.cookieEnabled,
+        doNotTrack: nav.doNotTrack || window.doNotTrack || null,
+        pdfViewerEnabled: nav.pdfViewerEnabled || false,
+        webdriver: nav.webdriver || false,  // bot белгісі
+        javaEnabled: typeof nav.javaEnabled === "function" ? nav.javaEnabled() : false,
+
+        // GPU + canvas fingerprint
+        gpuVendor: gpu.vendor,
+        gpuRenderer: gpu.renderer,
+        canvasFp: canvasHash,
+
+        // Бет контексті
+        referrer: document.referrer || null,
+        pageUrl: location.href,
+        pageTitle: document.title
+      };
+    }
+
+    // visitors/{voterId} — әр уникалды fingerprint үшін бір құжат
+    async function logVisit(meta) {
+      if (!voterId) return;
+      try {
+        const ref = doc(db, "visitors", voterId);
+        const snap = await getDoc(ref);
+        if (snap.exists()) {
+          await setDoc(ref, {
+            ...meta,
+            lastSeen: serverTimestamp(),
+            visitCount: increment(1)
+          }, { merge: true });
+        } else {
+          await setDoc(ref, {
+            ...meta,
+            firstSeen: serverTimestamp(),
+            lastSeen: serverTimestamp(),
+            visitCount: 1
+          });
+        }
+      } catch (err) {
+        console.warn("[visit] жазу қатесі:", err.code || err.message);
+      }
+    }
+
+    document.getElementById("year").textContent = new Date().getFullYear();
+    document.getElementById("totalNurses").textContent = NURSES.length;
+
+    // ---------- Topbar shadow on scroll ----------
+    const topbar = document.querySelector(".topbar");
+    window.addEventListener("scroll", () => {
+      topbar.classList.toggle("scrolled", window.scrollY > 8);
+    }, { passive: true });
+
+    // ---------- Анимациялық цифр ----------
+    function animateNumber(el, to, dur = 900) {
+      if (!el) return;
+      const from = Number(el.textContent.replace(/\D/g, "")) || 0;
+      if (from === to) { el.textContent = to; return; }
+      const start = performance.now();
+      function tick(now) {
+        const t = Math.min(1, (now - start) / dur);
+        const eased = 1 - Math.pow(1 - t, 3);
+        el.textContent = Math.round(from + (to - from) * eased);
+        if (t < 1) requestAnimationFrame(tick);
+      }
+      requestAnimationFrame(tick);
+    }
+
+    // ---------- Confetti ----------
+    function fireConfetti() {
+      const cv = document.getElementById("confetti");
+      const ctx = cv.getContext("2d");
+      cv.style.display = "block";
+      const W = cv.width = window.innerWidth;
+      const H = cv.height = window.innerHeight;
+      const colors = ["#0ea5e9", "#10b981", "#f59e0b", "#ef4444", "#8b5cf6", "#ec4899", "#22d3ee"];
+      const N = 160;
+      const parts = Array.from({ length: N }).map(() => ({
+        x: W / 2 + (Math.random() - .5) * 200,
+        y: H * 0.35 + (Math.random() - .5) * 60,
+        vx: (Math.random() - .5) * 18,
+        vy: -Math.random() * 18 - 6,
+        g: 0.45 + Math.random() * 0.2,
+        size: 6 + Math.random() * 8,
+        rot: Math.random() * Math.PI * 2,
+        vr: (Math.random() - .5) * 0.4,
+        color: colors[Math.floor(Math.random() * colors.length)],
+        shape: Math.random() < 0.5 ? "rect" : "circ",
+        life: 0,
+        maxLife: 120 + Math.random() * 60
+      }));
+      let running = true;
+      function frame() {
+        ctx.clearRect(0, 0, W, H);
+        let alive = 0;
+        for (const p of parts) {
+          p.life++;
+          if (p.life > p.maxLife) continue;
+          alive++;
+          p.vy += p.g;
+          p.x += p.vx;
+          p.y += p.vy;
+          p.rot += p.vr;
+          ctx.save();
+          ctx.translate(p.x, p.y);
+          ctx.rotate(p.rot);
+          ctx.globalAlpha = Math.max(0, 1 - p.life / p.maxLife);
+          ctx.fillStyle = p.color;
+          if (p.shape === "rect") {
+            ctx.fillRect(-p.size / 2, -p.size / 3, p.size, p.size * 0.6);
+          } else {
+            ctx.beginPath();
+            ctx.arc(0, 0, p.size / 2, 0, Math.PI * 2);
+            ctx.fill();
+          }
+          ctx.restore();
+        }
+        if (alive > 0 && running) requestAnimationFrame(frame);
+        else { cv.style.display = "none"; ctx.clearRect(0, 0, W, H); }
+      }
+      requestAnimationFrame(frame);
+    }
+
+    // ---------- 1) Firestore "Voise" коллекциясынан дауыстарды алу (live) ----------
+    function listenVotes() {
+      onSnapshot(
+        collection(db, "Voise"),
+        snap => {
+          voteCounts = {};
+          snap.forEach(d => { voteCounts[d.id] = (d.data().votes || 0); });
+          render();
+        },
+        err => {
+          console.error("[firestore] Voise оқу қатесі:", err.code, err.message);
+          render(); // дауыстар келмесе де карточкалар көрінсін
+        }
+      );
+    }
+
+    // ---------- 3) Карточкаларды салу ----------
+    let lastSignature = "";
+    function render() {
+      const total = Object.values(voteCounts).reduce((a, b) => a + b, 0);
+      animateNumber(document.getElementById("totalVotes"), total);
+      animateNumber(document.getElementById("liveCount"), total);
+
+      // тізімді сұрыптау (дауыс беруден кейін рейтинг бойынша)
+      const list = NURSES.map(n => ({ ...n, votes: voteCounts[n.id] || 0 }));
+      if (alreadyVoted) list.sort((a, b) => b.votes - a.votes);
+
+      // Тек өзгеріс болғанда қайта рендер ету (бар анимациялар сақталады)
+      const sig = JSON.stringify({ list: list.map(x => [x.id, x.votes]), voted: votedFor, already: alreadyVoted, photos: Object.keys(photoUrls).length });
+      if (sig === lastSignature) return;
+      const isFirstRender = !lastSignature;
+      lastSignature = sig;
+
+      grid.innerHTML = "";
+      list.forEach((n, idx) => {
+        const card = document.createElement("div");
+        card.className = "card" + (votedFor === n.id ? " selected" : "");
+        if (isFirstRender && idx < 6) card.style.setProperty("--delay", (idx * 0.05) + "s");
+        else card.style.setProperty("--delay", "0s");
+
+        const pct = total > 0 ? Math.round((n.votes / total) * 100) : 0;
+        const rankBadge = alreadyVoted
+          ? `<div class="badge-rank ${idx === 0 ? 'gold' : idx === 1 ? 'silver' : idx === 2 ? 'bronze' : ''}">#${idx + 1}${idx === 0 ? ' 🏆' : ''}</div>`
+          : "";
+
+        const isAboveFold = idx < 6;
+        const photo = photoUrls[n.id]
+          ? `<img src="${photoUrls[n.id]}" alt="${escapeHtml(n.name)}" width="400" height="400" decoding="async" loading="${isAboveFold ? 'eager' : 'lazy'}" fetchpriority="${isAboveFold ? 'high' : 'low'}"/>`
+          : `<div class="placeholder">
              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
            </div>`;
 
-      const action = alreadyVoted
-        ? `<div class="results-row">
+        const action = alreadyVoted
+          ? `<div class="results-row">
              <div class="res-info">
-               <span>${pct}%${votedFor===n.id?' <span class="your-pick">Сіздің таңдауыңыз</span>':''}</span>
+               <span>${pct}%${votedFor === n.id ? ' <span class="your-pick">Сіздің таңдауыңыз</span>' : ''}</span>
                <b>${n.votes} дауыс</b>
              </div>
              <div class="bar-wrap"><div class="bar" data-w="${pct}" style="width:0"></div></div>
            </div>`
-        : `<button class="vote-btn" data-id="${n.id}">
+          : `<button class="vote-btn" data-id="${n.id}">
              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
              Дауыс беру
            </button>`;
 
-      card.innerHTML = `
+        card.innerHTML = `
         <div class="ph">
           ${photo}
           ${rankBadge}
@@ -1103,161 +2128,162 @@
           </div>
           ${action}
         </div>`;
-      grid.appendChild(card);
-    });
-
-    // Дауыс бергеннен кейін rахмет баннерін көрсету
-    if(alreadyVoted && list.length){
-      const pickName = list.find(x=>x.id===votedFor)?.name || "—";
-      document.getElementById("thankPick").textContent = pickName;
-      document.getElementById("thankBanner").style.display = "flex";
-    }
-
-    // bar-ды кейінірек, фрейм соңында толтыру (анимация үшін)
-    requestAnimationFrame(()=>{
-      grid.querySelectorAll(".bar").forEach(bar=>{
-        const w = bar.dataset.w || "0";
-        bar.style.width = w + "%";
+        grid.appendChild(card);
       });
-    });
 
-    // дауыс түймесіне оқиға жалғау
-    grid.querySelectorAll(".vote-btn").forEach(btn=>{
-      btn.addEventListener("click", ()=> openConfirm(btn.dataset.id));
-    });
-  }
+      // Дауыс бергеннен кейін rахмет баннерін көрсету
+      if (alreadyVoted && list.length) {
+        const pickName = list.find(x => x.id === votedFor)?.name || "—";
+        document.getElementById("thankPick").textContent = pickName;
+        document.getElementById("thankBanner").style.display = "flex";
+      }
 
-  // ---------- 4) Растау модалы ----------
-  const modal = document.getElementById("modal");
-  const modalPick = document.getElementById("modalPick");
-  let pendingId = null;
-
-  function openConfirm(id){
-    if(alreadyVoted) return;
-    pendingId = id;
-    const n = NURSES.find(x=>x.id===id);
-    const ph = photoUrls[id]
-      ? `<img src="${photoUrls[id]}" alt=""/>`
-      : `<div class="ph2"></div>`;
-    modalPick.innerHTML = `${ph}<div><b>${escapeHtml(n.name)}</b><br><small>${escapeHtml(n.department)}</small></div>`;
-    modal.classList.add("open");
-  }
-  function closeConfirm(){ modal.classList.remove("open"); pendingId=null; }
-  document.getElementById("cancelBtn").addEventListener("click", closeConfirm);
-  modal.addEventListener("click", e=>{ if(e.target===modal) closeConfirm(); });
-
-  document.getElementById("confirmBtn").addEventListener("click", async ()=>{
-    if(!pendingId || alreadyVoted) return;
-    if(!voterId){
-      // IP әлі алынбады — қазір жылдам алып көрейік
-      voterId = await buildVoterId();
-    }
-    if(!voterId){ alert("Желі қатесі. Интернетті тексеріп қайталаңыз."); return; }
-    const id = pendingId;
-    const btn = document.getElementById("confirmBtn");
-    btn.disabled = true; btn.textContent = "Сақталуда...";
-    try{
-      const nurseRef = doc(db, "Voise", id);
-      const voterRef = doc(db, "voters", voterId);
-
-      await runTransaction(db, async (tx)=>{
-        const voterSnap = await tx.get(voterRef);
-        if(voterSnap.exists()){
-          throw new Error("ALREADY_VOTED");
-        }
-        const nurseSnap = await tx.get(nurseRef);
-        if(!nurseSnap.exists()){
-          tx.set(nurseRef, { nurseId:id, votes:1, createdAt: serverTimestamp() });
-        } else {
-          tx.update(nurseRef, { votes: (nurseSnap.data().votes||0) + 1 });
-        }
-        const meta = window.__visitorMeta || await collectMetadata();
-        tx.set(voterRef, {
-          nurseId: id,
-          votedAt: serverTimestamp(),
-          ...meta
+      // bar-ды кейінірек, фрейм соңында толтыру (анимация үшін)
+      requestAnimationFrame(() => {
+        grid.querySelectorAll(".bar").forEach(bar => {
+          const w = bar.dataset.w || "0";
+          bar.style.width = w + "%";
         });
       });
 
-      localStorage.setItem(VOTE_KEY, id);
-      alreadyVoted = true;
-      votedFor = id;
-      lastSignature = ""; // мәжбүрлеп қайта рендер
-      closeConfirm();
-      render();
-      window.scrollTo({top:0,behavior:"smooth"});
-      setTimeout(fireConfetti, 300);
-    }catch(err){
-      console.error("[vote] қате:", err);
-      if(err.message === "ALREADY_VOTED"){
-        alert("Бұл құрылғыдан (немесе осы желідегі осы ОЖ-ден) бұрын дауыс берілген. Бір рет қана дауыс беруге болады.");
-        try{
-          const v = await getDoc(doc(db, "voters", voterId));
-          if(v.exists()){
-            votedFor = v.data().nurseId;
-            localStorage.setItem(VOTE_KEY, votedFor);
-            alreadyVoted = true;
-            closeConfirm();
-            render();
+      // дауыс түймесіне оқиға жалғау
+      grid.querySelectorAll(".vote-btn").forEach(btn => {
+        btn.addEventListener("click", () => openConfirm(btn.dataset.id));
+      });
+    }
+
+    // ---------- 4) Растау модалы ----------
+    const modal = document.getElementById("modal");
+    const modalPick = document.getElementById("modalPick");
+    let pendingId = null;
+
+    function openConfirm(id) {
+      if (alreadyVoted) return;
+      pendingId = id;
+      const n = NURSES.find(x => x.id === id);
+      const ph = photoUrls[id]
+        ? `<img src="${photoUrls[id]}" alt=""/>`
+        : `<div class="ph2"></div>`;
+      modalPick.innerHTML = `${ph}<div><b>${escapeHtml(n.name)}</b><br><small>${escapeHtml(n.department)}</small></div>`;
+      modal.classList.add("open");
+    }
+    function closeConfirm() { modal.classList.remove("open"); pendingId = null; }
+    document.getElementById("cancelBtn").addEventListener("click", closeConfirm);
+    modal.addEventListener("click", e => { if (e.target === modal) closeConfirm(); });
+
+    document.getElementById("confirmBtn").addEventListener("click", async () => {
+      if (!pendingId || alreadyVoted) return;
+      if (!voterId) {
+        // IP әлі алынбады — қазір жылдам алып көрейік
+        voterId = await buildVoterId();
+      }
+      if (!voterId) { alert("Желі қатесі. Интернетті тексеріп қайталаңыз."); return; }
+      const id = pendingId;
+      const btn = document.getElementById("confirmBtn");
+      btn.disabled = true; btn.textContent = "Сақталуда...";
+      try {
+        const nurseRef = doc(db, "Voise", id);
+        const voterRef = doc(db, "voters", voterId);
+
+        await runTransaction(db, async (tx) => {
+          const voterSnap = await tx.get(voterRef);
+          if (voterSnap.exists()) {
+            throw new Error("ALREADY_VOTED");
           }
-        }catch{}
-      } else {
-        alert("Қате орын алды: " + (err.code || err.message || "белгісіз"));
-      }
-    }finally{
-      btn.disabled = false; btn.textContent = "Иә, дауыс беру";
-    }
-  });
+          const nurseSnap = await tx.get(nurseRef);
+          if (!nurseSnap.exists()) {
+            tx.set(nurseRef, { nurseId: id, votes: 1, createdAt: serverTimestamp() });
+          } else {
+            tx.update(nurseRef, { votes: (nurseSnap.data().votes || 0) + 1 });
+          }
+          const meta = window.__visitorMeta || await collectMetadata();
+          tx.set(voterRef, {
+            nurseId: id,
+            votedAt: serverTimestamp(),
+            ...meta
+          });
+        });
 
-  function escapeHtml(s){ return String(s||"").replace(/[&<>"']/g,m=>({ "&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;" }[m])); }
-
-  // ---------- Серверден дауыс мәртебесін тексеру ----------
-  async function checkAlreadyVoted(){
-    if(!voterId) return;
-    try{
-      const snap = await getDoc(doc(db, "voters", voterId));
-      if(snap.exists()){
-        votedFor = snap.data().nurseId;
+        localStorage.setItem(VOTE_KEY, id);
         alreadyVoted = true;
-        localStorage.setItem(VOTE_KEY, votedFor);
-      } else if(alreadyVoted){
-        // localStorage айтады "дауыс бердім", бірақ серверде жоқ — кэшті тазалау
-        alreadyVoted = false;
-        votedFor = null;
-        localStorage.removeItem(VOTE_KEY);
+        votedFor = id;
+        lastSignature = ""; // мәжбүрлеп қайта рендер
+        closeConfirm();
+        render();
+        window.scrollTo({ top: 0, behavior: "smooth" });
+        setTimeout(fireConfetti, 300);
+      } catch (err) {
+        console.error("[vote] қате:", err);
+        if (err.message === "ALREADY_VOTED") {
+          alert("Бұл құрылғыдан (немесе осы желідегі осы ОЖ-ден) бұрын дауыс берілген. Бір рет қана дауыс беруге болады.");
+          try {
+            const v = await getDoc(doc(db, "voters", voterId));
+            if (v.exists()) {
+              votedFor = v.data().nurseId;
+              localStorage.setItem(VOTE_KEY, votedFor);
+              alreadyVoted = true;
+              closeConfirm();
+              render();
+            }
+          } catch { }
+        } else {
+          alert("Қате орын алды: " + (err.code || err.message || "белгісіз"));
+        }
+      } finally {
+        btn.disabled = false; btn.textContent = "Иә, дауыс беру";
       }
-    }catch(err){
-      console.warn("[voters] тексеру қатесі:", err.code || err.message);
+    });
+
+    function escapeHtml(s) { return String(s || "").replace(/[&<>"']/g, m => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[m])); }
+
+    // ---------- Серверден дауыс мәртебесін тексеру ----------
+    async function checkAlreadyVoted() {
+      if (!voterId) return;
+      try {
+        const snap = await getDoc(doc(db, "voters", voterId));
+        if (snap.exists()) {
+          votedFor = snap.data().nurseId;
+          alreadyVoted = true;
+          localStorage.setItem(VOTE_KEY, votedFor);
+        } else if (alreadyVoted) {
+          // localStorage айтады "дауыс бердім", бірақ серверде жоқ — кэшті тазалау
+          alreadyVoted = false;
+          votedFor = null;
+          localStorage.removeItem(VOTE_KEY);
+        }
+      } catch (err) {
+        console.warn("[voters] тексеру қатесі:", err.code || err.message);
+      }
     }
-  }
 
-  // ---------- Іске қосу ----------
-  (async function init(){
-    // 1) Карточкаларды лезде көрсету — фото URL-дері дайын, желі күтілмейді
-    render();
+    // ---------- Іске қосу ----------
+    (async function init() {
+      // 1) Карточкаларды лезде көрсету — фото URL-дері дайын, желі күтілмейді
+      render();
 
-    // 2) Live дауыстар — фон жұмысы ретінде бастаймыз
-    listenVotes();
+      // 2) Live дауыстар — фон жұмысы ретінде бастаймыз
+      listenVotes();
 
-    // 3) IP+OS fingerprint құру + voters тексеру — фон режимінде
-    requestIdleCallback ? requestIdleCallback(initVoterFlow, {timeout:1500}) : setTimeout(initVoterFlow, 0);
-  })();
+      // 3) IP+OS fingerprint құру + voters тексеру — фон режимінде
+      requestIdleCallback ? requestIdleCallback(initVoterFlow, { timeout: 1500 }) : setTimeout(initVoterFlow, 0);
+    })();
 
-  async function initVoterFlow(){
-    voterId = await buildVoterId();
-    await checkAlreadyVoted();
-    lastSignature = "";
-    render();
+    async function initVoterFlow() {
+      voterId = await buildVoterId();
+      await checkAlreadyVoted();
+      lastSignature = "";
+      render();
 
-    // Метадеректерді жинап, visitors коллекциясына жазу — фон режимінде
-    try{
-      const meta = await collectMetadata();
-      window.__visitorMeta = meta; // дауыс беру кезінде қайта пайдалану үшін
-      await logVisit(meta);
-    }catch(err){
-      console.warn("[meta] қате:", err.message);
+      // Метадеректерді жинап, visitors коллекциясына жазу — фон режимінде
+      try {
+        const meta = await collectMetadata();
+        window.__visitorMeta = meta; // дауыс беру кезінде қайта пайдалану үшін
+        await logVisit(meta);
+      } catch (err) {
+        console.warn("[meta] қате:", err.message);
+      }
     }
-  }
-</script>
+  </script>
 </body>
+
 </html>
