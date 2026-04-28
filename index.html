@@ -2192,10 +2192,9 @@
           }
           const nurseSnap = await tx.get(nurseRef);
           if (!nurseSnap.exists()) {
-            tx.set(nurseRef, { nurseId: id, votes: 1, createdAt: serverTimestamp() });
-          } else {
-            tx.update(nurseRef, { votes: (nurseSnap.data().votes || 0) + 1 });
+            throw new Error("UNKNOWN_NURSE");
           }
+          tx.update(nurseRef, { votes: (nurseSnap.data().votes || 0) + 1 });
           const meta = window.__visitorMeta || await collectMetadata();
           tx.set(voterRef, {
             nurseId: id,
@@ -2214,7 +2213,9 @@
         setTimeout(fireConfetti, 300);
       } catch (err) {
         console.error("[vote] қате:", err);
-        if (err.message === "ALREADY_VOTED") {
+        if (err.message === "UNKNOWN_NURSE") {
+          alert("Бұл медбике тізімде жоқ.");
+        } else if (err.message === "ALREADY_VOTED") {
           alert("Бұл құрылғыдан (немесе осы желідегі осы ОЖ-ден) бұрын дауыс берілген. Бір рет қана дауыс беруге болады.");
           try {
             const v = await getDoc(doc(db, "voters", voterId));
